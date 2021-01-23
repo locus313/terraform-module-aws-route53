@@ -14,7 +14,7 @@ resource "aws_route53_record" "records_a" {
   name       = element(keys(var.records_a), count.index )
   type       = "A"
   ttl        = var.ttl
-  records    = [ split(", ", element(values(var.records_a), count.index))} ]
+  records    = [ split(", ", element(values(var.records_a), count.index)) ]
 
 }
 
