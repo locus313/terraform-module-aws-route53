@@ -14,7 +14,7 @@ resource "aws_route53_record" "records_a" {
   name       = element(keys(var.records_a), count.index )
   type       = "A"
   ttl        = var.ttl
-  records    = [ element(values(var.records_a), count.index) ]
+  records    = element(values(var.records_a), count.index)
 
 }
 
@@ -25,7 +25,7 @@ resource "aws_route53_record" "records_cname" {
   name       = element(keys(var.records_cname), count.index )
   type       = "CNAME"
   ttl        = var.ttl
-  records    = [ element(values(var.records_cname), count.index) ]
+  records    = element(values(var.records_cname), count.index)
 }
 
 resource "aws_route53_record" "records_mx" {
@@ -35,7 +35,7 @@ resource "aws_route53_record" "records_mx" {
   name       = element(keys(var.records_mx), count.index )
   type       = "MX"
   ttl        = var.ttl
-  records    = [ element(values(var.records_mx), count.index) ]
+  records    = element(values(var.records_mx), count.index)
 }
 
 resource "aws_route53_record" "records_txt" {
@@ -45,7 +45,7 @@ resource "aws_route53_record" "records_txt" {
   name       = element(keys(var.records_txt), count.index )
   type       = "TXT"
   ttl        = var.ttl
-  records    = [ element(values(var.records_txt), count.index) ]
+  records    = element(values(var.records_txt), count.index)
 }
 
 resource "aws_route53_record" "records_ns" {
@@ -55,5 +55,5 @@ resource "aws_route53_record" "records_ns" {
   name       = element(keys(var.records_ns), count.index )
   type       = "NS"
   ttl        = var.ttl
-  records    = [ element(values(var.records_ns), count.index) ]
+  records    = element(values(var.records_ns), count.index)
 }
