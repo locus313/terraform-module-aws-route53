@@ -16,31 +16,26 @@ variable "ttl" {
 }
 
 variable "records_a" {
-  type        = any
+  type        = map
   description = "Map of A records separate by comma and space (, )"
-  default     = []
 }
 
 variable "records_cname" {
-  type        = any
+  type        = map
   description = "Map of CNAME records separate by comma and space (, )"
-  default     = []
 }
 
 variable "records_mx" {
-  type        = any
+  type        = map
   description = "Map of MX records separate by comma and space (, )"
-  default     = []
 }
 
 variable "records_txt" {
-  type        = any
+  type        = map
   description = "Map of TXT records separate by comma and space (, )"
-  default     = []
 }
 
 variable "records_ns" {
-  type        = any
+  type        = map
   description = "Map of NS records separate by comma and space (, )"
-  default     = []
 }
