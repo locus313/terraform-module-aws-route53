@@ -1,11 +1,12 @@
 variable "primary_domain" {
   description = "Map of Route53 Primary domain parameters"
-  type        = string
+  type        = any
 }
 
 variable "sub_domain" {
   description = "Map of Route53 Primary domain parameters"
-  type        = map
+  type        = any
+  default     = null
 }
 
 variable "ttl" {
@@ -15,26 +16,31 @@ variable "ttl" {
 }
 
 variable "records_a" {
-  type        = map
+  type        = any
   description = "Map of A records separate by comma and space (, )"
+  default     = []
 }
 
 variable "records_cname" {
-  type        = map
+  type        = any
   description = "Map of CNAME records separate by comma and space (, )"
+  default     = []
 }
 
 variable "records_mx" {
-  type        = map
+  type        = any
   description = "Map of MX records separate by comma and space (, )"
+  default     = []
 }
 
 variable "records_txt" {
-  type        = map
+  type        = any
   description = "Map of TXT records separate by comma and space (, )"
+  default     = []
 }
 
 variable "records_ns" {
-  type        = map
+  type        = any
   description = "Map of NS records separate by comma and space (, )"
+  default     = []
 }
