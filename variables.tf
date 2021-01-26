@@ -49,4 +49,5 @@ variable "records_ns" {
 variable "records_wr" {
   type        = map
   description = "Map of 301 http redirect records separate by comma and space (,)"
+  default     = {}
 }
