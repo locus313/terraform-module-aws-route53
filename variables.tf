@@ -1,10 +1,10 @@
 variable "primary_domain" {
-  description = "Map of Route53 Primary domain parameters"
+  description = "Route53 Primary domain"
   type        = any
 }
 
 variable "sub_domain" {
-  description = "Map of Route53 Primary domain parameters"
+  description = "Map of Route53 sub domains"
   type        = any
   default     = null
 }
@@ -23,31 +23,36 @@ variable "ttl_acm" {
 
 variable "records_a" {
   type        = map
-  description = "Map of A records separate by comma and space (,)"
+  description = "Map of A records separate by comma (,)"
+  default     = {}
 }
 
 variable "records_cname" {
   type        = map
-  description = "Map of CNAME records separate by comma and space (,)"
+  description = "Map of CNAME records separate by comma (,)"
+  default     = {}
 }
 
 variable "records_mx" {
   type        = map
-  description = "Map of MX records separate by comma and space (,)"
+  description = "Map of MX records separate by comma (,)"
+  default     = {}
 }
 
 variable "records_txt" {
   type        = map
-  description = "Map of TXT records separate by comma and space (,)"
+  description = "Map of TXT records separate by comma (,)"
+  default     = {}
 }
 
 variable "records_ns" {
   type        = map
-  description = "Map of NS records separate by comma and space (,)"
+  description = "Map of NS records separate by comma (,)"
+  default     = {}
 }
 
 variable "records_wr" {
   type        = map
-  description = "Map of 301 http redirect records separate by comma and space (,)"
+  description = "Map of redirect records"
   default     = {}
 }
