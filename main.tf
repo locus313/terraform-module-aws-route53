@@ -18,6 +18,39 @@ resource "aws_route53_record" "records_a" {
 
 }
 
+resource "aws_route53_record" "records_wr" {
+  depends_on = [aws_route53_zone.this]
+  count      = length(keys(var.records_wr))
+  zone_id    = aws_route53_zone.this.zone_id
+  name       = element(keys(var.records_wr), count.index )
+  type       = "A"
+
+  alias {
+    name                   = aws_cloudfront_distribution.records_wr[count.index].domain_name
+    zone_id                = aws_cloudfront_distribution.records_wr[count.index].hosted_zone_id
+    evaluate_target_health = false
+  }
+}
+
+resource "aws_route53_record" "records_wr_validation" {
+  depends_on = [aws_route53_zone.this]
+  for_each = {
+    for dvo in flatten([
+      for cert in aws_acm_certificate.records_wr: cert.domain_validation_options
+    ]): dvo.domain_name => {
+      name   = dvo.resource_record_name
+      record = dvo.resource_record_value
+      type   = dvo.resource_record_type
+    }
+  }
+  allow_overwrite = true
+  name            = each.value.name
+  records         = [each.value.record]
+  ttl             = var.ttl_acm
+  type            = each.value.type
+  zone_id         = aws_route53_zone.this.zone_id
+}
+
 resource "aws_route53_record" "records_cname" {
   depends_on = [aws_route53_zone.this]
   count      = length(keys(var.records_cname))
