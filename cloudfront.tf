@@ -1,3 +1,4 @@
+#tfsec:ignore:AWS045
 resource "aws_cloudfront_distribution" "records_wr" {
   depends_on = [aws_acm_certificate.records_wr]
   count      = length(keys(var.records_wr))
@@ -60,6 +61,7 @@ resource "aws_cloudfront_distribution" "records_wr" {
       }
     }
 
+    #tfsec:ignore:AWS020
     viewer_protocol_policy = "allow-all"
     min_ttl                = 0
     default_ttl            = 300
@@ -75,6 +77,7 @@ resource "aws_cloudfront_distribution" "records_wr" {
   viewer_certificate {
     acm_certificate_arn      = aws_acm_certificate_validation.records_wr[count.index].certificate_arn
     ssl_support_method       = "sni-only"
+    #tfsec:ignore:AWS021
     minimum_protocol_version = "TLSv1"
   }
 
