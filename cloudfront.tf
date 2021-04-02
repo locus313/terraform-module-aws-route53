@@ -61,7 +61,7 @@ resource "aws_cloudfront_distribution" "records_wr" {
       }
     }
 
-    #tfsec:ignore:AWS020
+    #tfsec:ignore:AWS020 tfsec:ignore:AWS072
     viewer_protocol_policy = "allow-all"
     min_ttl                = 0
     default_ttl            = 300
