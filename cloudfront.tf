@@ -1,4 +1,4 @@
-#tfsec:ignore:AWS045
+#tfsec:ignore:AWS045 tfsec:ignore:AWS071
 resource "aws_cloudfront_distribution" "records_wr" {
   depends_on = [aws_acm_certificate.records_wr]
   count      = length(keys(var.records_wr))
