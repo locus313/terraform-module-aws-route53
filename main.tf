@@ -9,12 +9,12 @@ resource "aws_route53_zone" "subthis" {
 
 resource "aws_route53_record" "records_a" {
   depends_on = [aws_route53_zone.this]
-  count      = length(keys(var.records_a))
+  for_each   = toset(var.records_a)
   zone_id    = aws_route53_zone.this.zone_id
-  name       = element(keys(var.records_a), count.index )
+  name       = each.key
   type       = "A"
   ttl        = var.ttl
-  records    = element(values(var.records_a), count.index)
+  records    = each.value
 
 }
 
