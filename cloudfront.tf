@@ -1,12 +1,12 @@
 #tfsec:ignore:AWS045 tfsec:ignore:AWS071
 resource "aws_cloudfront_distribution" "records_wr" {
   depends_on = [aws_acm_certificate.records_wr]
-  count      = length(keys(var.records_wr))
+  for_each   = toset(var.records_wr)
   http_version = "http2"
 
   origin {
-    origin_id   = "origin-${element(keys(var.records_wr), count.index )}"
-    domain_name = aws_s3_bucket.records_wr[count.index].website_endpoint
+    origin_id   = "origin-${each.key}"
+    domain_name = aws_s3_bucket.records_wr[each.key].website_endpoint
 
     # https://docs.aws.amazon.com/AmazonCloudFront/latest/
     # DeveloperGuide/distribution-web-values-specify.html
@@ -36,19 +36,19 @@ resource "aws_cloudfront_distribution" "records_wr" {
     # Not the best, but...
     custom_header {
       name  = "User-Agent"
-      value = base64sha512("REFER-SECRET-19265125-${element(keys(var.records_wr), count.index )}-43568442")
+      value = base64sha512("REFER-SECRET-19265125-${each.key}-43568442")
     }
 
   }
 
   enabled = true
 
-  aliases = [element(keys(var.records_wr), count.index )]
+  aliases = [each.key]
 
   price_class = "PriceClass_100"
 
   default_cache_behavior {
-    target_origin_id = "origin-${element(keys(var.records_wr), count.index )}"
+    target_origin_id = "origin-${each.key}"
     allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
     cached_methods   = ["GET", "HEAD"]
     compress         = true
@@ -75,7 +75,7 @@ resource "aws_cloudfront_distribution" "records_wr" {
   }
 
   viewer_certificate {
-    acm_certificate_arn      = aws_acm_certificate_validation.records_wr[count.index].certificate_arn
+    acm_certificate_arn      = aws_acm_certificate_validation.records_wr[each.key].certificate_arn
     ssl_support_method       = "sni-only"
     #tfsec:ignore:AWS021
     minimum_protocol_version = "TLSv1"

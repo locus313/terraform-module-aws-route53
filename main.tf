@@ -3,8 +3,9 @@ resource "aws_route53_zone" "this" {
 }
 
 resource "aws_route53_zone" "subthis" {
-  count      = length(keys(var.sub_domain))
-  name       = element(values(var.sub_domain), count.index )
+  depends_on = [aws_route53_zone.this]
+  for_each   = toset(var.sub_domain)
+  name       = each.value
 }
 
 resource "aws_route53_record" "records_a" {
@@ -20,14 +21,14 @@ resource "aws_route53_record" "records_a" {
 
 resource "aws_route53_record" "records_wr" {
   depends_on = [aws_route53_zone.this]
-  count      = length(keys(var.records_wr))
+  for_each   = toset(var.records_wr)
   zone_id    = aws_route53_zone.this.zone_id
-  name       = element(keys(var.records_wr), count.index )
+  name       = each.key
   type       = "A"
 
   alias {
-    name                   = aws_cloudfront_distribution.records_wr[count.index].domain_name
-    zone_id                = aws_cloudfront_distribution.records_wr[count.index].hosted_zone_id
+    name                   = aws_cloudfront_distribution.records_wr[each.key].domain_name
+    zone_id                = aws_cloudfront_distribution.records_wr[each.key].hosted_zone_id
     evaluate_target_health = false
   }
 }
@@ -53,40 +54,40 @@ resource "aws_route53_record" "records_wr_validation" {
 
 resource "aws_route53_record" "records_cname" {
   depends_on = [aws_route53_zone.this]
-  count      = length(keys(var.records_cname))
+  for_each   = toset(var.records_cname)
   zone_id    = aws_route53_zone.this.zone_id
-  name       = element(keys(var.records_cname), count.index )
+  name       = each.key
   type       = "CNAME"
   ttl        = var.ttl
-  records    = element(values(var.records_cname), count.index)
+  records    = each.value
 }
 
 resource "aws_route53_record" "records_mx" {
   depends_on = [aws_route53_zone.this]
-  count      = length(keys(var.records_mx))
+  for_each   = toset(var.records_mx)
   zone_id    = aws_route53_zone.this.zone_id
-  name       = element(keys(var.records_mx), count.index )
+  name       = each.key
   type       = "MX"
   ttl        = var.ttl
-  records    = element(values(var.records_mx), count.index)
+  records    = each.value
 }
 
 resource "aws_route53_record" "records_txt" {
   depends_on = [aws_route53_zone.this]
-  count      = length(keys(var.records_txt))
+  for_each   = toset(var.records_txt)
   zone_id    = aws_route53_zone.this.zone_id
-  name       = element(keys(var.records_txt), count.index )
+  name       = each.key
   type       = "TXT"
   ttl        = var.ttl
-  records    = element(values(var.records_txt), count.index)
+  records    = each.value
 }
 
 resource "aws_route53_record" "records_ns" {
   depends_on = [aws_route53_zone.this]
-  count      = length(keys(var.records_ns))
+  for_each   = toset(var.records_txt)
   zone_id    = aws_route53_zone.this.zone_id
-  name       = element(keys(var.records_ns), count.index )
+  name       = each.key
   type       = "NS"
   ttl        = var.ttl
-  records    = element(values(var.records_ns), count.index)
+  records    = each.value
 }
