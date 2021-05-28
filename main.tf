@@ -4,13 +4,13 @@ resource "aws_route53_zone" "this" {
 
 resource "aws_route53_zone" "subthis" {
   depends_on = [aws_route53_zone.this]
-  for_each   = toset(var.sub_domain)
+  for_each   = var.sub_domain
   name       = each.value
 }
 
 resource "aws_route53_record" "records_a" {
   depends_on = [aws_route53_zone.this]
-  for_each   = toset(var.records_a)
+  for_each   = var.records_a
   zone_id    = aws_route53_zone.this.zone_id
   name       = each.key
   type       = "A"
@@ -21,7 +21,7 @@ resource "aws_route53_record" "records_a" {
 
 resource "aws_route53_record" "records_wr" {
   depends_on = [aws_route53_zone.this]
-  for_each   = toset(var.records_wr)
+  for_each   = var.records_wr
   zone_id    = aws_route53_zone.this.zone_id
   name       = each.key
   type       = "A"
@@ -54,7 +54,7 @@ resource "aws_route53_record" "records_wr_validation" {
 
 resource "aws_route53_record" "records_cname" {
   depends_on = [aws_route53_zone.this]
-  for_each   = toset(var.records_cname)
+  for_each   = var.records_cname
   zone_id    = aws_route53_zone.this.zone_id
   name       = each.key
   type       = "CNAME"
@@ -64,7 +64,7 @@ resource "aws_route53_record" "records_cname" {
 
 resource "aws_route53_record" "records_mx" {
   depends_on = [aws_route53_zone.this]
-  for_each   = toset(var.records_mx)
+  for_each   = var.records_mx
   zone_id    = aws_route53_zone.this.zone_id
   name       = each.key
   type       = "MX"
@@ -74,7 +74,7 @@ resource "aws_route53_record" "records_mx" {
 
 resource "aws_route53_record" "records_txt" {
   depends_on = [aws_route53_zone.this]
-  for_each   = toset(var.records_txt)
+  for_each   = var.records_txt
   zone_id    = aws_route53_zone.this.zone_id
   name       = each.key
   type       = "TXT"
@@ -84,7 +84,7 @@ resource "aws_route53_record" "records_txt" {
 
 resource "aws_route53_record" "records_ns" {
   depends_on = [aws_route53_zone.this]
-  for_each   = toset(var.records_txt)
+  for_each   = var.records_txt
   zone_id    = aws_route53_zone.this.zone_id
   name       = each.key
   type       = "NS"
