@@ -84,7 +84,7 @@ resource "aws_route53_record" "records_txt" {
 
 resource "aws_route53_record" "records_ns" {
   depends_on = [aws_route53_zone.this]
-  for_each   = var.records_txt
+  for_each   = var.records_ns
   zone_id    = aws_route53_zone.this.zone_id
   name       = each.key
   type       = "NS"
