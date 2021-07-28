@@ -78,7 +78,7 @@ resource "aws_cloudfront_distribution" "records_wr" {
     acm_certificate_arn      = aws_acm_certificate_validation.records_wr[each.key].certificate_arn
     ssl_support_method       = "sni-only"
     #tfsec:ignore:AWS021
-    minimum_protocol_version = "TLSv1"
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 
 }
