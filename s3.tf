@@ -2,8 +2,11 @@
 resource "aws_s3_bucket" "records_wr" {
   for_each   = var.records_wr
   bucket     = each.key
+}
 
-  website {
-    redirect_all_requests_to = each.value
-  }
+resource "aws_s3_bucket_website_configuration" "records_wr" {
+  for_each   = var.records_wr
+  bucket = aws_s3_bucket.records_wr[each.key].id
+
+  redirect_all_requests_to = each.value
 }
