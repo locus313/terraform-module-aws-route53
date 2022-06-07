@@ -10,5 +10,6 @@ resource "aws_s3_bucket_website_configuration" "records_wr" {
 
   redirect_all_requests_to {
     host_name = each.value
+    protocol  = "https"
   }
 }
