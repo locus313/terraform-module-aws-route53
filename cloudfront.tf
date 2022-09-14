@@ -6,7 +6,7 @@ resource "aws_cloudfront_distribution" "records_wr" {
 
   origin {
     origin_id   = "origin-${each.key}"
-    domain_name = aws_s3_bucket.records_wr[each.key].website_endpoint
+    domain_name = aws_s3_bucket_website_configuration.records_wr[each.key].website_endpoint
 
     # https://docs.aws.amazon.com/AmazonCloudFront/latest/
     # DeveloperGuide/distribution-web-values-specify.html
