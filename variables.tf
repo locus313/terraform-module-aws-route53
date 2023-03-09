@@ -3,12 +3,6 @@ variable "primary_domain" {
   type        = any
 }
 
-variable "sub_domain" {
-  description = "Map of Route53 sub domains"
-  type        = any
-  default     = null
-}
-
 variable "ttl" {
   description = "Default TTL for All records"
   type        = number

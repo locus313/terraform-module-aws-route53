@@ -19,11 +19,6 @@ module "modusbox-com" {
    
    primary_domain                                              = "example.com"
    
-   sub_domain = {
-     "clusters.example.com"                                    = "clusters.example.com"
-     "envs.example.com"                                        = "envs.example.com"
-   }
-   
    records_wr = {
      "support.example.com"                                     = "https://example.atlassian.net/servicedesk/customer/portals"
    }
@@ -109,7 +104,6 @@ Supported record types as follows:
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | primary\_domain | Route53 Primary domain | `any` |  | yes |
-| sub\_domain | Map of Route53 sub domains | `any` | `null` | no |
 | ttl | Default TTL for All records | `number` | `3600` | no |
 | ttl\_acm | Default TTL for acm records | `number` | `60` | no |
 | records\_a | Map of A records separate by comma (,) | `map` | `{}` | no |

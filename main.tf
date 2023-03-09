@@ -2,12 +2,6 @@ resource "aws_route53_zone" "this" {
   name       = var.primary_domain
 }
 
-resource "aws_route53_zone" "subthis" {
-  depends_on = [aws_route53_zone.this]
-  for_each   = var.sub_domain
-  name       = each.value
-}
-
 resource "aws_route53_record" "records_a" {
   depends_on = [aws_route53_zone.this]
   for_each   = var.records_a
