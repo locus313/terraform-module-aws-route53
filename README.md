@@ -67,7 +67,7 @@ No modules.
 
 ```hcl
 module "example-com" {
-   source = "git@github.com:modusintegration/terraform-module-aws-route53.git"
+   source = "git@github.com:locus313/terraform-module-aws-route53.git"
    
    primary_domain                                              = "example.com"
    
