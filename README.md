@@ -66,7 +66,7 @@ No modules.
 ### Create Route53 zones and records
 
 ```hcl
-module "modusbox-com" {
+module "example-com" {
    source = "git@github.com:modusintegration/terraform-module-aws-route53.git"
    
    primary_domain                                              = "example.com"
