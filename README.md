@@ -107,11 +107,6 @@ module "example-com" {
 
 Note that `depends_on` in modules is available since Terraform 0.13.
 
-
-## Examples
-
-* [Route53 records example](https://github.com/modusintegration/aws-it-account-terraform/blob/master/modules/dns/modusbox-com.tf) which shows how to create Route53 records.
-
 ## DNS record types
 
 Supported record types as follows:
