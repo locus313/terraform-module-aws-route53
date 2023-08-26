@@ -10,7 +10,16 @@ resource "aws_route53_record" "records_a" {
   type       = "A"
   ttl        = var.ttl
   records    = each.value
+}
 
+resource "aws_route53_record" "records_caa" {
+  depends_on = [aws_route53_zone.this]
+  for_each   = var.records_caa
+  zone_id    = aws_route53_zone.this.zone_id
+  name       = each.key
+  type       = "CAA"
+  ttl        = var.ttl
+  records    = each.value
 }
 
 resource "aws_route53_record" "records_wr" {

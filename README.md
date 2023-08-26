@@ -78,6 +78,10 @@ module "example-com" {
    records_a = {
      "example.com"                                             = ["12.23.45.56"]
    }
+
+   records_caa = {
+     "example.com"                                             = ["0 issue "letsencrypt.org""]
+   }
    
    records_cname = {
      "calendar.example.com"                                    = ["ghs.googlehosted.com"]
@@ -115,7 +119,7 @@ Supported record types as follows:
 | ------------- | ---------- |
 | A             | YES        |
 | AAAA          | NO         |
-| CAA           | NO         |
+| CAA           | YES        |
 | CNAME         | YES        |
 | LOC           | NO         |
 | MX            | YES        |

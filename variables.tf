@@ -21,6 +21,12 @@ variable "records_a" {
   default     = {}
 }
 
+variable "records_caa" {
+  type        = map
+  description = "Map of CAA records separate by comma (,)"
+  default     = {}
+}
+
 variable "records_cname" {
   type        = map
   description = "Map of CNAME records separate by comma (,)"
