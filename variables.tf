@@ -15,6 +15,12 @@ variable "ttl_acm" {
   default     = "60"
 }
 
+variable "ttl_ns" {
+  description = "Default TTL for ns records"
+  type        = number
+  default     = "172800"
+}
+
 variable "records_a" {
   type        = map
   description = "Map of A records separate by comma (,)"

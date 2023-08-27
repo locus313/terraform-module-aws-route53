@@ -91,6 +91,6 @@ resource "aws_route53_record" "records_ns" {
   zone_id    = aws_route53_zone.this.zone_id
   name       = each.key
   type       = "NS"
-  ttl        = var.ttl
+  ttl        = var.ttl_ns
   records    = each.value
 }
