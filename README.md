@@ -82,6 +82,10 @@ module "example-com" {
      "example.com"                                             = ["12.23.45.56"]
    }
 
+   records_aaaa = {
+     "example.com"                                             = ["::ffff:c17:2d38"]
+   }
+
    records_caa = {
      "example.com"                                             = ["0 issue \"letsencrypt.org\""]
    }
@@ -121,7 +125,7 @@ Supported record types as follows:
 | Record type   | Supported |
 | ------------- | ---------- |
 | A             | YES        |
-| AAAA          | NO         |
+| AAAA          | YES        |
 | CAA           | YES        |
 | CNAME         | YES        |
 | LOC           | NO         |
