@@ -82,7 +82,7 @@ module "example-com" {
    }
 
    records_caa = {
-     "example.com"                                             = ["0 issue "letsencrypt.org""]
+     "example.com"                                             = ["0 issue \"letsencrypt.org\""]
    }
    
    records_cname = {
