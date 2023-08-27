@@ -1,5 +1,5 @@
 resource "aws_route53_zone" "this" {
-  name       = var.primary_domain
+  name = var.primary_domain
 }
 
 resource "aws_route53_record" "records_a" {
@@ -8,6 +8,16 @@ resource "aws_route53_record" "records_a" {
   zone_id    = aws_route53_zone.this.zone_id
   name       = each.key
   type       = "A"
+  ttl        = var.ttl
+  records    = each.value
+}
+
+resource "aws_route53_record" "records_aaaa" {
+  depends_on = [aws_route53_zone.this]
+  for_each   = var.records_aaaa
+  zone_id    = aws_route53_zone.this.zone_id
+  name       = each.key
+  type       = "AAAA"
   ttl        = var.ttl
   records    = each.value
 }
@@ -40,8 +50,8 @@ resource "aws_route53_record" "records_wr_validation" {
   depends_on = [aws_route53_zone.this]
   for_each = {
     for dvo in flatten([
-      for cert in aws_acm_certificate.records_wr: cert.domain_validation_options
-    ]): dvo.domain_name => {
+      for cert in aws_acm_certificate.records_wr : cert.domain_validation_options
+      ]) : dvo.domain_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
