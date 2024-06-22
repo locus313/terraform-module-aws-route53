@@ -1,7 +1,7 @@
 #tfsec:ignore:AWS045 tfsec:ignore:AWS071
 resource "aws_cloudfront_distribution" "records_wr" {
-  depends_on = [aws_acm_certificate.records_wr]
-  for_each   = var.records_wr
+  depends_on   = [aws_acm_certificate.records_wr]
+  for_each     = var.records_wr
   http_version = "http2"
 
   origin {
@@ -17,13 +17,13 @@ resource "aws_cloudfront_distribution" "records_wr" {
       # doesn't support HTTPS connections for website endpoints."
       origin_protocol_policy = "http-only"
 
-      http_port = "80"
+      http_port  = "80"
       https_port = "443"
 
       # TODO: given the origin_protocol_policy set to `http-only`,
       # not sure what this does...
       # "If the origin is an Amazon S3 bucket, CloudFront always uses TLSv1.2."
-      origin_ssl_protocols   = ["TLSv1.2"]
+      origin_ssl_protocols = ["TLSv1.2"]
     }
 
     # s3_origin_config is not compatible with S3 website hosting, if this
@@ -75,8 +75,8 @@ resource "aws_cloudfront_distribution" "records_wr" {
   }
 
   viewer_certificate {
-    acm_certificate_arn      = aws_acm_certificate_validation.records_wr[each.key].certificate_arn
-    ssl_support_method       = "sni-only"
+    acm_certificate_arn = aws_acm_certificate_validation.records_wr[each.key].certificate_arn
+    ssl_support_method  = "sni-only"
     #tfsec:ignore:AWS021
     minimum_protocol_version = "TLSv1.2_2021"
   }

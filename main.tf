@@ -4,47 +4,47 @@ resource "aws_route53_zone" "this" {
 }
 
 resource "aws_route53_record" "records_a" {
-  for_each   = var.records_a
+  for_each = var.records_a
 
-  zone_id    = aws_route53_zone.this[0].zone_id
-  name       = each.key
-  type       = "A"
-  ttl        = var.ttl
-  records    = each.value
+  zone_id = aws_route53_zone.this[0].zone_id
+  name    = each.key
+  type    = "A"
+  ttl     = var.ttl
+  records = each.value
 
   depends_on = [aws_route53_zone.this]
 }
 
 resource "aws_route53_record" "records_aaaa" {
-  for_each   = var.records_aaaa
+  for_each = var.records_aaaa
 
-  zone_id    = aws_route53_zone.this[0].zone_id
-  name       = each.key
-  type       = "AAAA"
-  ttl        = var.ttl
-  records    = each.value
+  zone_id = aws_route53_zone.this[0].zone_id
+  name    = each.key
+  type    = "AAAA"
+  ttl     = var.ttl
+  records = each.value
 
   depends_on = [aws_route53_zone.this]
 }
 
 resource "aws_route53_record" "records_caa" {
-  for_each   = var.records_caa
+  for_each = var.records_caa
 
-  zone_id    = aws_route53_zone.this[0].zone_id
-  name       = each.key
-  type       = "CAA"
-  ttl        = var.ttl
-  records    = each.value
+  zone_id = aws_route53_zone.this[0].zone_id
+  name    = each.key
+  type    = "CAA"
+  ttl     = var.ttl
+  records = each.value
 
   depends_on = [aws_route53_zone.this]
 }
 
 resource "aws_route53_record" "records_wr" {
-  for_each   = var.records_wr
+  for_each = var.records_wr
 
-  zone_id    = aws_route53_zone.this[0].zone_id
-  name       = each.key
-  type       = "A"
+  zone_id = aws_route53_zone.this[0].zone_id
+  name    = each.key
+  type    = "A"
 
   alias {
     name                   = aws_cloudfront_distribution.records_wr[each.key].domain_name
@@ -77,49 +77,49 @@ resource "aws_route53_record" "records_wr_validation" {
 }
 
 resource "aws_route53_record" "records_cname" {
-  for_each   = var.records_cname
+  for_each = var.records_cname
 
-  zone_id    = aws_route53_zone.this[0].zone_id
-  name       = each.key
-  type       = "CNAME"
-  ttl        = var.ttl
-  records    = each.value
+  zone_id = aws_route53_zone.this[0].zone_id
+  name    = each.key
+  type    = "CNAME"
+  ttl     = var.ttl
+  records = each.value
 
   depends_on = [aws_route53_zone.this]
 }
 
 resource "aws_route53_record" "records_mx" {
-  for_each   = var.records_mx
+  for_each = var.records_mx
 
-  zone_id    = aws_route53_zone.this[0].zone_id
-  name       = each.key
-  type       = "MX"
-  ttl        = var.ttl
-  records    = each.value
+  zone_id = aws_route53_zone.this[0].zone_id
+  name    = each.key
+  type    = "MX"
+  ttl     = var.ttl
+  records = each.value
 
   depends_on = [aws_route53_zone.this]
 }
 
 resource "aws_route53_record" "records_txt" {
-  for_each   = var.records_txt
+  for_each = var.records_txt
 
-  zone_id    = aws_route53_zone.this[0].zone_id
-  name       = each.key
-  type       = "TXT"
-  ttl        = var.ttl
-  records    = each.value
+  zone_id = aws_route53_zone.this[0].zone_id
+  name    = each.key
+  type    = "TXT"
+  ttl     = var.ttl
+  records = each.value
 
   depends_on = [aws_route53_zone.this]
 }
 
 resource "aws_route53_record" "records_ns" {
-  for_each   = var.records_ns
+  for_each = var.records_ns
 
-  zone_id    = aws_route53_zone.this[0].zone_id
-  name       = each.key
-  type       = "NS"
-  ttl        = var.ttl_ns
-  records    = each.value
+  zone_id = aws_route53_zone.this[0].zone_id
+  name    = each.key
+  type    = "NS"
+  ttl     = var.ttl_ns
+  records = each.value
 
   depends_on = [aws_route53_zone.this]
 }
