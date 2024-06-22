@@ -1,7 +1,7 @@
 #tfsec:ignore:AWS045 tfsec:ignore:AWS071
 resource "aws_cloudfront_distribution" "records_wr" {
-  depends_on   = [aws_acm_certificate.records_wr]
   for_each     = var.records_wr
+  
   http_version = "http2"
 
   origin {
@@ -80,5 +80,7 @@ resource "aws_cloudfront_distribution" "records_wr" {
     #tfsec:ignore:AWS021
     minimum_protocol_version = "TLSv1.2_2021"
   }
+
+  depends_on   = [aws_acm_certificate.records_wr]
 
 }
