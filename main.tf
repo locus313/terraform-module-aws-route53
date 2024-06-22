@@ -6,7 +6,7 @@ resource "aws_route53_zone" "this" {
 resource "aws_route53_record" "records_a" {
   for_each   = var.records_a
 
-  zone_id    = aws_route53_zone.this.zone_id
+  zone_id    = aws_route53_zone.this[0].zone_id
   name       = each.key
   type       = "A"
   ttl        = var.ttl
@@ -18,7 +18,7 @@ resource "aws_route53_record" "records_a" {
 resource "aws_route53_record" "records_aaaa" {
   for_each   = var.records_aaaa
 
-  zone_id    = aws_route53_zone.this.zone_id
+  zone_id    = aws_route53_zone.this[0].zone_id
   name       = each.key
   type       = "AAAA"
   ttl        = var.ttl
@@ -30,7 +30,7 @@ resource "aws_route53_record" "records_aaaa" {
 resource "aws_route53_record" "records_caa" {
   for_each   = var.records_caa
 
-  zone_id    = aws_route53_zone.this.zone_id
+  zone_id    = aws_route53_zone.this[0].zone_id
   name       = each.key
   type       = "CAA"
   ttl        = var.ttl
@@ -42,7 +42,7 @@ resource "aws_route53_record" "records_caa" {
 resource "aws_route53_record" "records_wr" {
   for_each   = var.records_wr
 
-  zone_id    = aws_route53_zone.this.zone_id
+  zone_id    = aws_route53_zone.this[0].zone_id
   name       = each.key
   type       = "A"
 
@@ -71,7 +71,7 @@ resource "aws_route53_record" "records_wr_validation" {
   records         = [each.value.record]
   ttl             = var.ttl_acm
   type            = each.value.type
-  zone_id         = aws_route53_zone.this.zone_id
+  zone_id         = aws_route53_zone.this[0].zone_id
 
   depends_on = [aws_route53_zone.this]
 }
@@ -79,7 +79,7 @@ resource "aws_route53_record" "records_wr_validation" {
 resource "aws_route53_record" "records_cname" {
   for_each   = var.records_cname
 
-  zone_id    = aws_route53_zone.this.zone_id
+  zone_id    = aws_route53_zone.this[0].zone_id
   name       = each.key
   type       = "CNAME"
   ttl        = var.ttl
@@ -91,7 +91,7 @@ resource "aws_route53_record" "records_cname" {
 resource "aws_route53_record" "records_mx" {
   for_each   = var.records_mx
 
-  zone_id    = aws_route53_zone.this.zone_id
+  zone_id    = aws_route53_zone.this[0].zone_id
   name       = each.key
   type       = "MX"
   ttl        = var.ttl
@@ -103,7 +103,7 @@ resource "aws_route53_record" "records_mx" {
 resource "aws_route53_record" "records_txt" {
   for_each   = var.records_txt
 
-  zone_id    = aws_route53_zone.this.zone_id
+  zone_id    = aws_route53_zone.this[0].zone_id
   name       = each.key
   type       = "TXT"
   ttl        = var.ttl
@@ -114,8 +114,8 @@ resource "aws_route53_record" "records_txt" {
 
 resource "aws_route53_record" "records_ns" {
   for_each   = var.records_ns
-  
-  zone_id    = aws_route53_zone.this.zone_id
+
+  zone_id    = aws_route53_zone.this[0].zone_id
   name       = each.key
   type       = "NS"
   ttl        = var.ttl_ns
