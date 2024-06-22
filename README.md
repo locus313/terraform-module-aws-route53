@@ -74,7 +74,7 @@ No modules.
 ```hcl
 module "example-com" {
    source = "locus313/aws-route53/module"
-   version = "1.0.3"
+   version = "1.0.4"
    
    enabled                                                     = true
    primary_domain                                              = "example.com"
