@@ -1,6 +1,6 @@
 module "example-com" {
    source = "locus313/aws-route53/module"
-   version = "1.0.4"
+   version = "1.0.5"
    
    enabled                                                     = true
    primary_domain                                              = "example.com"
