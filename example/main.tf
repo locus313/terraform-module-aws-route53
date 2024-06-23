@@ -6,7 +6,6 @@ module "example-com" {
    primary_domain                                              = "example.com"
    
    records_wr = {
-     "support.example.com"                                     = "https://example.atlassian.net/servicedesk/customer/portals"
    }
    
    records_a = {
