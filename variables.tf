@@ -52,7 +52,7 @@ variable "records_ns" {
 }
 
 variable "records_wr" {
-  type        = map(list(string))
+  type        = map(string)
   description = "Map of redirect records"
   default     = {}
 }

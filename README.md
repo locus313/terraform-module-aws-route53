@@ -54,7 +54,7 @@ No modules.
 | <a name="input_records_mx"></a> [records\_mx](#input\_records\_mx) | Map of MX records separate by comma (,) | `map(list(string))` | `{}` | no |
 | <a name="input_records_ns"></a> [records\_ns](#input\_records\_ns) | Map of NS records separate by comma (,) | `map(list(string))` | `{}` | no |
 | <a name="input_records_txt"></a> [records\_txt](#input\_records\_txt) | Map of TXT records separate by comma (,) | `map(list(string))` | `{}` | no |
-| <a name="input_records_wr"></a> [records\_wr](#input\_records\_wr) | Map of redirect records | `map(list(string))` | `{}` | no |
+| <a name="input_records_wr"></a> [records\_wr](#input\_records\_wr) | Map of redirect records | `map(string)` | `{}` | no |
 | <a name="input_ttl"></a> [ttl](#input\_ttl) | Default TTL for All records | `number` | `"3600"` | no |
 | <a name="input_ttl_acm"></a> [ttl\_acm](#input\_ttl\_acm) | Default TTL for acm records | `number` | `"60"` | no |
 | <a name="input_ttl_ns"></a> [ttl\_ns](#input\_ttl\_ns) | Default TTL for ns records | `number` | `"172800"` | no |
