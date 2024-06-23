@@ -24,14 +24,13 @@ jobs:
         with:
           terraform_version: 0.13.1
 
-      - name: Install dependencies
-        run: |
-          go get -u github.com/gruntwork-io/terratest/modules/terratest
+      - name: Download Go Modules
+        working-directory: test
+        run: go mod download
 
       - name: Run Terratest
-        run: |
-          cd test
-          go test -v
+        working-directory: test
+        run: go test -v
 
   terraform-compliance:
     name: Run Terraform Compliance
