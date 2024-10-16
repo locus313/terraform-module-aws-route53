@@ -68,9 +68,8 @@ jobs:
         run: terraform plan -out=tfplan -input=false
         working-directory: ./example
 
-      - name: Install terraform-compliance
-        run: |
-          pip install terraform-compliance
-
-      - name: Run terraform-compliance
-        run: terraform-compliance -p ./example/tfplan -f ./compliance/features
+      - name: terraform-compliance
+        uses: terraform-compliance/github_action@main
+        with:
+          plan: ./example/tfplan
+          features: ./compliance/features
