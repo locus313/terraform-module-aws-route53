@@ -41,7 +41,7 @@ jobs:
 
   terraform-compliance:
     name: Run Terraform Compliance
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: terratest
 
     steps:
