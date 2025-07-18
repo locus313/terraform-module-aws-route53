@@ -1,5 +1,8 @@
 name: Scheduled Terraform Test
 
+permissions:
+  contents: read
+
 on:
   schedule:
     - cron: "0 0 * * *" # Runs every day at midnight UTC
