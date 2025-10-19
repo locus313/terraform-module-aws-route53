@@ -395,6 +395,53 @@ No modules.
 
 ## Development
 
+### Commit Message Convention
+
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) for automated releases. Commit messages must follow this format:
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+**Types that trigger releases:**
+- `feat:` - New feature (triggers MINOR version bump, e.g., 1.2.0 → 1.3.0)
+- `fix:` - Bug fix (triggers PATCH version bump, e.g., 1.2.0 → 1.2.1)
+- `feat!:` or `BREAKING CHANGE:` - Breaking change (triggers MAJOR version bump, e.g., 1.2.0 → 2.0.0)
+
+**Other types** (trigger PATCH version bump):
+- `docs:` - Documentation changes
+- `chore:` - Build process or auxiliary tool changes
+- `refactor:` - Code refactoring without changing functionality
+- `test:` - Adding or modifying tests
+- `style:` - Code style changes (formatting, whitespace)
+- `perf:` - Performance improvements
+
+**Examples:**
+
+```bash
+# Patch release (1.2.3 → 1.2.4)
+git commit -m "fix: correct CloudFront origin protocol policy"
+git commit -m "docs: update README with new examples"
+
+# Minor release (1.2.3 → 1.3.0)
+git commit -m "feat: add support for Route53 health checks"
+git commit -m "feat(dns): add PTR record type support"
+
+# Major release (1.2.3 → 2.0.0)
+git commit -m "feat!: change records_wr to accept object instead of string"
+# or
+git commit -m "feat: redesign module structure
+
+BREAKING CHANGE: module now requires AWS provider >= 5.0"
+```
+
+> [!NOTE]
+> Releases are automatically created when `*.tf` files are changed on the `main` branch. See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
+
 ### Running Tests
 
 This module includes both Go-based Terratest and compliance tests:

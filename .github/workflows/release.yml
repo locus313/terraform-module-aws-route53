@@ -1,0 +1,156 @@
+name: Create Release
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.tf'
+      - '!example/**.tf'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for proper versioning
+
+      - name: Get latest tag
+        id: get_latest_tag
+        run: |
+          # Get the latest tag, default to v0.0.0 if no tags exist
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "Latest tag: $LATEST_TAG"
+
+      - name: Determine version bump
+        id: version_bump
+        run: |
+          LATEST_TAG="${{ steps.get_latest_tag.outputs.latest_tag }}"
+          
+          # Remove 'v' prefix for version manipulation
+          VERSION=${LATEST_TAG#v}
+          
+          # Split version into major.minor.patch
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          
+          # Check commit messages since last tag for version bump hints
+          COMMITS=$(git log $LATEST_TAG..HEAD --pretty=format:"%s" 2>/dev/null || git log --pretty=format:"%s")
+          
+          # Determine bump type based on commit messages
+          if echo "$COMMITS" | grep -qiE "^BREAKING CHANGE:|^[a-z]+!:"; then
+            # Major version bump for breaking changes
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+            BUMP_TYPE="major"
+          elif echo "$COMMITS" | grep -qiE "^feat(\([^)]*\))?:"; then
+            # Minor version bump for new features
+            MINOR=$((MINOR + 1))
+            PATCH=0
+            BUMP_TYPE="minor"
+          else
+            # Patch version bump for everything else
+            PATCH=$((PATCH + 1))
+            BUMP_TYPE="patch"
+          fi
+          
+          NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "bump_type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION (${BUMP_TYPE} bump)"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          LATEST_TAG="${{ steps.get_latest_tag.outputs.latest_tag }}"
+          NEW_VERSION="${{ steps.version_bump.outputs.new_version }}"
+          
+          echo "# Release $NEW_VERSION" > CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          
+          # Get commit messages since last tag
+          if [ "$LATEST_TAG" = "v0.0.0" ]; then
+            echo "## Initial Release" >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            git log --pretty=format:"- %s (%h)" >> CHANGELOG.md
+          else
+            echo "## Changes since $LATEST_TAG" >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            
+            # Categorize commits
+            FEATURES=$(git log $LATEST_TAG..HEAD --pretty=format:"%s (%h)" --grep="^feat" 2>/dev/null || true)
+            FIXES=$(git log $LATEST_TAG..HEAD --pretty=format:"%s (%h)" --grep="^fix" 2>/dev/null || true)
+            BREAKING=$(git log $LATEST_TAG..HEAD --pretty=format:"%s (%h)" --grep="^BREAKING CHANGE:\|!" 2>/dev/null || true)
+            OTHER=$(git log $LATEST_TAG..HEAD --pretty=format:"%s (%h)" --invert-grep --grep="^feat\|^fix\|^BREAKING CHANGE:\|!" 2>/dev/null || true)
+            
+            if [ -n "$BREAKING" ]; then
+              echo "### ⚠️ Breaking Changes" >> CHANGELOG.md
+              echo "$BREAKING" | sed 's/^/- /' >> CHANGELOG.md
+              echo "" >> CHANGELOG.md
+            fi
+            
+            if [ -n "$FEATURES" ]; then
+              echo "### ✨ Features" >> CHANGELOG.md
+              echo "$FEATURES" | sed 's/^/- /' >> CHANGELOG.md
+              echo "" >> CHANGELOG.md
+            fi
+            
+            if [ -n "$FIXES" ]; then
+              echo "### 🐛 Bug Fixes" >> CHANGELOG.md
+              echo "$FIXES" | sed 's/^/- /' >> CHANGELOG.md
+              echo "" >> CHANGELOG.md
+            fi
+            
+            if [ -n "$OTHER" ]; then
+              echo "### 🔧 Other Changes" >> CHANGELOG.md
+              echo "$OTHER" | sed 's/^/- /' >> CHANGELOG.md
+              echo "" >> CHANGELOG.md
+            fi
+          fi
+          
+          # Add module information
+          echo "## Module Information" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "**Terraform Version:** >= 1.0" >> CHANGELOG.md
+          echo "**AWS Provider Version:** >= 4.0" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "For usage examples, see the [README](README.md)." >> CHANGELOG.md
+          
+          cat CHANGELOG.md
+
+      - name: Create Git tag
+        run: |
+          NEW_VERSION="${{ steps.version_bump.outputs.new_version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$NEW_VERSION" -m "Release $NEW_VERSION"
+          git push origin "$NEW_VERSION"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version_bump.outputs.new_version }}
+          name: Release ${{ steps.version_bump.outputs.new_version }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Summary
+        run: |
+          echo "## 🎉 Release Created" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.version_bump.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Bump Type:** ${{ steps.version_bump.outputs.bump_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Previous Version:** ${{ steps.get_latest_tag.outputs.latest_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "View the release at: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version_bump.outputs.new_version }}" >> $GITHUB_STEP_SUMMARY
