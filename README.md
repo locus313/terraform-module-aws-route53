@@ -340,7 +340,7 @@ No modules.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_enabled"></a> [enabled](#input\_enabled) | Whether to enable Route 53 resources | `bool` | `true` | no |
-| <a name="input_primary_domain"></a> [primary\_domain](#input\_primary\_domain) | The domain name to manage | `string` | n/a | yes |
+| <a name="input_primary_domain"></a> [primary\_domain](#input\_primary\_domain) | The primary domain name to manage in Route 53 | `string` | n/a | yes |
 | <a name="input_records_a"></a> [records\_a](#input\_records\_a) | Map of A records (IPv4 addresses) | `map(list(string))` | `{}` | no |
 | <a name="input_records_aaaa"></a> [records\_aaaa](#input\_records\_aaaa) | Map of AAAA records (IPv6 addresses) | `map(list(string))` | `{}` | no |
 | <a name="input_records_caa"></a> [records\_caa](#input\_records\_caa) | Map of CAA records (Certificate Authority Authorization) | `map(list(string))` | `{}` | no |
