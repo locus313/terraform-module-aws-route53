@@ -56,6 +56,9 @@ resource "aws_route53_record" "records_wr" {
 }
 
 resource "aws_route53_record" "records_wr_validation" {
+  # Create DNS validation records for ACM certificates used in web redirects
+  # This uses a complex for_each to flatten domain_validation_options from all certificates
+  # and create a unique record for each domain that needs validation
   for_each = {
     for dvo in flatten([
       for cert in aws_acm_certificate.records_wr : cert.domain_validation_options

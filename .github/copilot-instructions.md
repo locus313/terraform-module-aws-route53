@@ -12,7 +12,7 @@ This is a reusable Terraform module that manages AWS Route53 hosted zones and DN
 - Default provider (inherits from caller) - for Route53 and S3 resources
 - `aws.acm` provider (must point to `us-east-1`) - for ACM certificates (CloudFront requirement)
 
-See `provider.tf` for the aliased provider declaration. Consumers must pass both providers when calling the module.
+See `versions.tf` for the configuration_aliases declaration. Consumers must pass both providers when calling the module using the `providers` block.
 
 ## Records Web Redirect (records_wr) Flow
 
