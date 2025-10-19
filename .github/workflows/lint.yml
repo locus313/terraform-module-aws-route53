@@ -38,5 +38,8 @@ jobs:
         if: failure()
         run: terraform fmt -diff -recursive
 
-      - name: Terraform Validate
-        run: terraform validate
+      - name: Terraform Validate (Example)
+        run: |
+          cd example
+          terraform init -input=false
+          terraform validate
