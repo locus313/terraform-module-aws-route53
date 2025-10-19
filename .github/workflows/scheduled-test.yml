@@ -32,7 +32,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: 0.13.1
+          terraform_version: 1.0.0
 
       - name: Download Go Modules
         working-directory: test
