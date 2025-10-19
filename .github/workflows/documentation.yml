@@ -1,9 +1,12 @@
 name: Generate terraform docs
 
-on:
-  - pull_request
 permissions:
   contents: write
+
+on:
+  pull_request:
+    branches:
+      - main
 
 jobs:
   docs:
