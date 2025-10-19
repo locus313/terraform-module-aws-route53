@@ -1,6 +1,6 @@
 resource "aws_route53_zone" "this" {
-  name  = var.primary_domain
   count = var.enabled ? 1 : 0
+  name  = var.primary_domain
 }
 
 resource "aws_route53_record" "records_a" {

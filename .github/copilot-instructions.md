@@ -1,120 +1,93 @@
-# Terraform AWS Route53 Module - AI Coding Agent Instructions
+# Terraform AWS Route53 Module - AI Agent Instructions
 
-## Module Architecture
+## Architecture Overview
 
-This is a reusable Terraform module that manages AWS Route53 hosted zones and DNS records with an advanced "web redirect" feature (`records_wr`). The redirect feature creates a complete infrastructure stack per domain: S3 bucket → CloudFront distribution → ACM certificate → Route53 A record to enable HTTPS redirects via CloudFront.
+Reusable Terraform module for Route53 hosted zones and DNS records with an HTTPS web redirect feature (`records_wr`). Creates ONE hosted zone per invocation and manages multiple DNS records via `for_each` loops.
 
-**Key architectural pattern**: All resources use `for_each` loops over input maps for dynamic resource creation. This module creates exactly ONE hosted zone per invocation (`var.primary_domain`) and multiple DNS records within it.
+**Web redirect infrastructure** (`records_wr`): Single input creates S3 bucket → ACM certificate → CloudFront → Route53 A record alias for HTTPS redirects.
 
 ## Critical Multi-Provider Setup
 
-**The module requires TWO AWS provider aliases**:
-- Default provider (inherits from caller) - for Route53 and S3 resources
-- `aws.acm` provider (must point to `us-east-1`) - for ACM certificates (CloudFront requirement)
+**Module requires TWO AWS providers** (see `versions.tf`):
+- Default provider - Route53, S3, CloudFront resources
+- `aws.acm` provider - **MUST be us-east-1** (CloudFront ACM requirement)
 
-See `versions.tf` for the `configuration_aliases` declaration. **Consumers MUST pass both providers** when calling the module:
-
+Consumers must pass both providers:
 ```hcl
 module "example" {
   source = "./terraform-module-aws-route53"
-  providers = {
-    aws.acm = aws.acm  # Must be us-east-1
-  }
-  # ...
+  providers = { aws.acm = aws.acm }  # us-east-1 region required
 }
 ```
 
-## Records Web Redirect (records_wr) Flow
+## Key Patterns & Gotchas
 
-The `records_wr` variable creates a complete redirect infrastructure per domain in this order:
+### Zone Indexing Pattern
+All resources use `aws_route53_zone.this[0].zone_id` (note `[0]`) because zone uses `count = var.enabled ? 1 : 0`, not `for_each`.
 
-1. **S3 bucket** (`s3.tf`) - configured for website hosting with `redirect_all_requests_to`
-2. **ACM certificate** (`cert.tf`) - created in us-east-1, DNS-validated automatically
-3. **Route53 validation records** (`main.tf:records_wr_validation`) - uses complex for_each with flattened `domain_validation_options`
-4. **CloudFront distribution** (`cloudfront.tf`) - uses `custom_origin_config` (not `s3_origin_config`) to support S3 website endpoints
-5. **Route53 A record alias** (`main.tf:records_wr`) - points to CloudFront distribution
+### DNS Record Variables
+- Standard records: `map(list(string))` - A, AAAA, CNAME, MX, TXT, NS, CAA
+- Web redirects: `map(string)` - single redirect URL per domain
+- TTL variables: `var.ttl` (3600), `var.ttl_acm` (60), `var.ttl_ns` (172800)
 
-**Critical**: CloudFront must use `custom_origin_config` with `origin_protocol_policy = "http-only"` because S3 website endpoints don't support HTTPS origins. The User-Agent header (`base64sha512("REFER-SECRET-...")`) acts as authentication between CloudFront and S3 bucket policy.
+### Web Redirect Architecture (records_wr)
 
-## DNS Record Type Patterns
+**Why CloudFront uses `custom_origin_config` not `s3_origin_config`**:
+- S3 website endpoints (`redirect_all_requests_to`) don't support HTTPS origins
+- Must use `origin_protocol_policy = "http-only"` (AWS limitation, not choice)
+- User-Agent header (`base64sha512("REFER-SECRET-...")`) authenticates CloudFront→S3 (see `s3.tf` bucket policy)
 
-All standard DNS record types (`records_a`, `records_aaaa`, `records_cname`, `records_mx`, `records_txt`, `records_ns`, `records_caa`) follow the same pattern in `main.tf`:
-- `for_each` over input variable map
-- `zone_id = aws_route53_zone.this[0].zone_id` (note the `[0]` index - zone uses `count` not `for_each`)
-- `depends_on = [aws_route53_zone.this]` explicit dependency
-- Different TTL variables: `var.ttl` (default 3600), `var.ttl_acm` (60), `var.ttl_ns` (172800)
-
-**Input format**: `map(list(string))` for most records (value is list), but `map(string)` for `records_wr` (single redirect URL).
-
-## Validation Record Complexity (records_wr_validation)
-
-The ACM certificate validation records use a complex nested loop pattern:
-
+**Certificate validation complexity** (`main.tf:records_wr_validation`):
 ```hcl
-for_each = {
-  for dvo in flatten([
-    for cert in aws_acm_certificate.records_wr : cert.domain_validation_options
-  ]) : dvo.domain_name => { ... }
-}
+for_each = { for dvo in flatten([
+  for cert in aws_acm_certificate.records_wr : cert.domain_validation_options
+]) : dvo.domain_name => { ... } }
 ```
-
-This flattens all `domain_validation_options` from all certificates and creates one Route53 record per domain that needs validation. The `aws_acm_certificate_validation.records_wr` resource then waits for all validation FQDNs.
-
-## Testing Strategy
-
-**Terratest** (`test/terraform_module_test.go`): 
-- Uses `example/` directory as test fixture
-- Pattern: `InitAndApply` → verify `zone_id` output → `Destroy`
-- Requires AWS credentials with Route53/S3/CloudFront/ACM permissions
-- Run: `cd test && go test -v -timeout 30m`
-
-**Compliance testing** (`compliance/features/example.feature`):
-- Gherkin-based BDD tests for policy compliance
-- Checks TTL values on record types (e.g., A records must have TTL 3600)
-- Run: `terraform-compliance -f compliance -p .`
-
-**When adding features**: Update both test types and ensure `example/main.tf` demonstrates the new capability.
-
-## Security & Compliance Annotations
-
-Uses `tfsec` inline ignore comments for intentional security exceptions:
-- `#tfsec:ignore:AWS002` (S3 bucket encryption) - redirect buckets don't store data
-- `#tfsec:ignore:AWS020` (CloudFront viewer protocol) - allows HTTP for redirects
-- `#tfsec:ignore:AWS045` (CloudFront logging) - not required for simple redirects
-- `#tfsec:ignore:AWS071` (WAF) - not required for redirect distributions
-- `#tfsec:ignore:AWS077` (S3 versioning) - no objects stored in redirect buckets
-
-**Don't remove these without understanding the redirect use case** - these are empty S3 buckets that immediately redirect, not data storage.
+Flattens all `domain_validation_options` from all ACM certs to create unique validation records.
 
 ## Development Workflows
 
+**⚠️ CRITICAL**: Module root cannot be validated directly. Always work from `example/` directory:
+
 ```bash
-# Initialize and validate module
-terraform init
-terraform validate
+# Format code (run from module root)
+terraform fmt -recursive
 
-# Test with example configuration
-cd example && terraform init && terraform plan
+# Validate/plan (MUST run from example/ directory)
+cd example && terraform init
+cd example && terraform validate
+cd example && terraform plan
 
-# Run Go integration tests (requires AWS credentials)
+# Run Go tests (requires AWS credentials)
 cd test && go test -v -timeout 30m
 
-# Run compliance tests (requires terraform-compliance installed)
+# Run compliance tests
 terraform-compliance -f compliance -p .
-
-# Format code
-terraform fmt -recursive
 ```
 
-## Module Outputs
+**Why example/ is required**: Module uses `configuration_aliases = [aws.acm]` which needs provider configuration only present in `example/provider.tf`.
 
-- `this_route53_zone_zone_id` - Zone ID for NS record delegation to child zones
-- `this_route53_zone_name_servers` - NS servers to configure at domain registrar
+## Testing
 
-## Common Gotchas
+**Terratest** (`test/terraform_module_test.go`): Go integration tests using `example/` as fixture
+**Compliance** (`compliance/features/example.feature`): Gherkin BDD for TTL policy checks
 
-1. **Provider configuration**: Calling code must provide `providers = { aws.acm = aws.us-east-1 }` or ACM cert creation fails with region error
-2. **Zone indexing**: Resources reference `aws_route53_zone.this[0]` not `aws_route53_zone.this` because zone uses `count = var.enabled ? 1 : 0`
-3. **Validation record for_each**: The `records_wr_validation` uses a flattened nested loop - each certificate's `domain_validation_options` becomes a separate record
-4. **CloudFront custom header**: The User-Agent header in `cloudfront.tf` acts as a shared secret for S3 bucket policy authentication (note: "not the best, but..." per inline comment)
-5. **S3 website endpoint**: Must use `custom_origin_config` with `http-only` protocol because S3 website endpoints don't support HTTPS origins (this is an AWS limitation, not module choice)
+When adding features: Update both test suites + `example/main.tf` demonstration.
+
+## Security Annotations
+
+`tfsec` ignores are intentional for redirect-only S3 buckets (no data storage):
+- `AWS002`/`AWS017` - Encryption not needed
+- `AWS020`/`AWS072` - HTTP viewer protocol allowed
+- `AWS045` - CloudFront logging not required
+- `AWS071` - WAF not required
+- `AWS077` - S3 versioning not needed
+
+**Do not remove** without understanding these are empty redirect buckets.
+
+## Common Errors
+
+1. **"Provider not configured"**: Missing `providers = { aws.acm = aws.acm }` or ACM provider not in us-east-1
+2. **Validation from module root fails**: Must run from `example/` directory (see Development Workflows)
+3. **Wrong zone reference**: Use `this[0]` not `this` for zone resource access
+4. **S3 origin errors**: CloudFront must use `custom_origin_config` for S3 website endpoints
