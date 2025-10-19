@@ -11,66 +11,66 @@ variable "primary_domain" {
 
 variable "records_a" {
   type        = map(list(string))
-  description = "Map of A records separate by comma (,)"
+  description = "Map of A records (IPv4 addresses)"
   default     = {}
 }
 
 variable "records_aaaa" {
   type        = map(list(string))
-  description = "Map of AAAA records separate by comma (,)"
+  description = "Map of AAAA records (IPv6 addresses)"
   default     = {}
 }
 
 variable "records_caa" {
   type        = map(list(string))
-  description = "Map of CAA records separate by comma (,)"
+  description = "Map of CAA records (Certificate Authority Authorization)"
   default     = {}
 }
 
 variable "records_cname" {
   type        = map(list(string))
-  description = "Map of CNAME records separate by comma (,)"
+  description = "Map of CNAME records (canonical name aliases)"
   default     = {}
 }
 
 variable "records_mx" {
   type        = map(list(string))
-  description = "Map of MX records separate by comma (,)"
+  description = "Map of MX records (mail exchange)"
   default     = {}
 }
 
 variable "records_txt" {
   type        = map(list(string))
-  description = "Map of TXT records separate by comma (,)"
+  description = "Map of TXT records (text records)"
   default     = {}
 }
 
 variable "records_ns" {
   type        = map(list(string))
-  description = "Map of NS records separate by comma (,)"
+  description = "Map of NS records (name server delegation)"
   default     = {}
 }
 
 variable "records_wr" {
   type        = map(string)
-  description = "Map of redirect records"
+  description = "Map of web redirect records (domain -> redirect URL)"
   default     = {}
 }
 
 variable "ttl" {
-  description = "Default TTL for All records"
+  description = "Default TTL for all DNS records (in seconds)"
   type        = number
-  default     = "3600"
+  default     = 3600
 }
 
 variable "ttl_acm" {
-  description = "Default TTL for acm records"
+  description = "TTL for ACM validation records (in seconds)"
   type        = number
-  default     = "60"
+  default     = 60
 }
 
 variable "ttl_ns" {
-  description = "Default TTL for ns records"
+  description = "TTL for NS records (in seconds)"
   type        = number
-  default     = "172800"
+  default     = 172800
 }

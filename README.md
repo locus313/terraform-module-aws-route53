@@ -39,6 +39,7 @@ No modules.
 | [aws_route53_record.records_wr_validation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
 | [aws_route53_zone.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_zone) | resource |
 | [aws_s3_bucket.records_wr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+| [aws_s3_bucket_policy.records_wr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_s3_bucket_website_configuration.records_wr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_website_configuration) | resource |
 
 ## Inputs
@@ -47,17 +48,17 @@ No modules.
 |------|-------------|------|---------|:--------:|
 | <a name="input_enabled"></a> [enabled](#input\_enabled) | Whether to enable Route 53 resources | `bool` | `true` | no |
 | <a name="input_primary_domain"></a> [primary\_domain](#input\_primary\_domain) | The domain name to manage | `string` | n/a | yes |
-| <a name="input_records_a"></a> [records\_a](#input\_records\_a) | Map of A records separate by comma (,) | `map(list(string))` | `{}` | no |
-| <a name="input_records_aaaa"></a> [records\_aaaa](#input\_records\_aaaa) | Map of AAAA records separate by comma (,) | `map(list(string))` | `{}` | no |
-| <a name="input_records_caa"></a> [records\_caa](#input\_records\_caa) | Map of CAA records separate by comma (,) | `map(list(string))` | `{}` | no |
-| <a name="input_records_cname"></a> [records\_cname](#input\_records\_cname) | Map of CNAME records separate by comma (,) | `map(list(string))` | `{}` | no |
-| <a name="input_records_mx"></a> [records\_mx](#input\_records\_mx) | Map of MX records separate by comma (,) | `map(list(string))` | `{}` | no |
-| <a name="input_records_ns"></a> [records\_ns](#input\_records\_ns) | Map of NS records separate by comma (,) | `map(list(string))` | `{}` | no |
-| <a name="input_records_txt"></a> [records\_txt](#input\_records\_txt) | Map of TXT records separate by comma (,) | `map(list(string))` | `{}` | no |
-| <a name="input_records_wr"></a> [records\_wr](#input\_records\_wr) | Map of redirect records | `map(string)` | `{}` | no |
-| <a name="input_ttl"></a> [ttl](#input\_ttl) | Default TTL for All records | `number` | `"3600"` | no |
-| <a name="input_ttl_acm"></a> [ttl\_acm](#input\_ttl\_acm) | Default TTL for acm records | `number` | `"60"` | no |
-| <a name="input_ttl_ns"></a> [ttl\_ns](#input\_ttl\_ns) | Default TTL for ns records | `number` | `"172800"` | no |
+| <a name="input_records_a"></a> [records\_a](#input\_records\_a) | Map of A records (IPv4 addresses) | `map(list(string))` | `{}` | no |
+| <a name="input_records_aaaa"></a> [records\_aaaa](#input\_records\_aaaa) | Map of AAAA records (IPv6 addresses) | `map(list(string))` | `{}` | no |
+| <a name="input_records_caa"></a> [records\_caa](#input\_records\_caa) | Map of CAA records (Certificate Authority Authorization) | `map(list(string))` | `{}` | no |
+| <a name="input_records_cname"></a> [records\_cname](#input\_records\_cname) | Map of CNAME records (canonical name aliases) | `map(list(string))` | `{}` | no |
+| <a name="input_records_mx"></a> [records\_mx](#input\_records\_mx) | Map of MX records (mail exchange) | `map(list(string))` | `{}` | no |
+| <a name="input_records_ns"></a> [records\_ns](#input\_records\_ns) | Map of NS records (name server delegation) | `map(list(string))` | `{}` | no |
+| <a name="input_records_txt"></a> [records\_txt](#input\_records\_txt) | Map of TXT records (text records) | `map(list(string))` | `{}` | no |
+| <a name="input_records_wr"></a> [records\_wr](#input\_records\_wr) | Map of web redirect records (domain -> redirect URL) | `map(string)` | `{}` | no |
+| <a name="input_ttl"></a> [ttl](#input\_ttl) | Default TTL for all DNS records (in seconds) | `number` | `3600` | no |
+| <a name="input_ttl_acm"></a> [ttl\_acm](#input\_ttl\_acm) | TTL for ACM validation records (in seconds) | `number` | `60` | no |
+| <a name="input_ttl_ns"></a> [ttl\_ns](#input\_ttl\_ns) | TTL for NS records (in seconds) | `number` | `172800` | no |
 
 ## Outputs
 
