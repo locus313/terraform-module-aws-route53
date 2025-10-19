@@ -3,7 +3,10 @@
 resource "aws_cloudfront_distribution" "records_wr" {
   for_each = var.records_wr
 
+  enabled      = true
   http_version = "http2"
+  aliases      = [each.key]
+  price_class  = "PriceClass_100" # US, Canada, and Europe
 
   origin {
     origin_id   = "origin-${each.key}"
@@ -27,10 +30,6 @@ resource "aws_cloudfront_distribution" "records_wr" {
       value = base64sha512("REFER-SECRET-19265125-${each.key}-43568442")
     }
   }
-
-  enabled     = true
-  aliases     = [each.key]
-  price_class = "PriceClass_100" # US, Canada, and Europe
 
   default_cache_behavior {
     target_origin_id = "origin-${each.key}"

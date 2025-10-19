@@ -1,0 +1,74 @@
+# .editorconfig
+# EditorConfig for Terraform AWS Route53 Module
+# https://editorconfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# Universal defaults for all files
+[*]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# Terraform files
+[*.tf]
+indent_style = space
+indent_size = 2
+
+# Terraform variable files
+[*.tfvars]
+indent_style = space
+indent_size = 2
+
+# HCL files (HashiCorp Configuration Language)
+[*.hcl]
+indent_style = space
+indent_size = 2
+
+# Markdown files
+[*.md]
+indent_style = space
+indent_size = 2
+trim_trailing_whitespace = false
+
+# YAML files (including GitHub Actions workflows)
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# Go test files
+[*.go]
+indent_style = tab
+indent_size = 4
+
+# Go module files
+[go.{mod,sum}]
+indent_style = tab
+
+# Feature files (Gherkin/Cucumber for compliance tests)
+[*.feature]
+indent_style = space
+indent_size = 2
+
+# JSON files
+[*.json]
+indent_style = space
+indent_size = 2
+
+# Shell scripts
+[*.sh]
+indent_style = space
+indent_size = 2
+
+# Makefile (requires tabs)
+[Makefile]
+indent_style = tab
+
+# Git configuration files
+[.git{ignore,attributes}]
+indent_style = space
+indent_size = 2
