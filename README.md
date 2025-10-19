@@ -296,44 +296,69 @@ module "complete_example" {
 ## API Reference
 
 <!-- BEGIN_TF_DOCS -->
-### Requirements
+## Requirements
 
 | Name | Version |
 |------|---------|
-| terraform | >= 1.0 |
-| aws | >= 4.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.0 |
 
-### Providers
+## Providers
 
 | Name | Version |
 |------|---------|
-| aws | >= 4.0 |
-| aws.acm | >= 4.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.0 |
+| <a name="provider_aws.acm"></a> [aws.acm](#provider\_aws.acm) | >= 4.0 |
 
-### Inputs
+## Modules
+
+No modules.
+
+## Resources
+
+| Name | Type |
+|------|------|
+| [aws_acm_certificate.records_wr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/acm_certificate) | resource |
+| [aws_acm_certificate_validation.records_wr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/acm_certificate_validation) | resource |
+| [aws_cloudfront_distribution.records_wr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution) | resource |
+| [aws_route53_record.records_a](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
+| [aws_route53_record.records_aaaa](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
+| [aws_route53_record.records_caa](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
+| [aws_route53_record.records_cname](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
+| [aws_route53_record.records_mx](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
+| [aws_route53_record.records_ns](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
+| [aws_route53_record.records_txt](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
+| [aws_route53_record.records_wr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
+| [aws_route53_record.records_wr_validation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record) | resource |
+| [aws_route53_zone.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_zone) | resource |
+| [aws_s3_bucket.records_wr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+| [aws_s3_bucket_policy.records_wr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
+| [aws_s3_bucket_website_configuration.records_wr](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_website_configuration) | resource |
+
+## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| `primary_domain` | The domain name to manage | `string` | n/a | yes |
-| `enabled` | Whether to enable Route 53 resources | `bool` | `true` | no |
-| `records_a` | Map of A records (IPv4 addresses) | `map(list(string))` | `{}` | no |
-| `records_aaaa` | Map of AAAA records (IPv6 addresses) | `map(list(string))` | `{}` | no |
-| `records_caa` | Map of CAA records (Certificate Authority Authorization) | `map(list(string))` | `{}` | no |
-| `records_cname` | Map of CNAME records (canonical name aliases) | `map(list(string))` | `{}` | no |
-| `records_mx` | Map of MX records (mail exchange) | `map(list(string))` | `{}` | no |
-| `records_ns` | Map of NS records (name server delegation) | `map(list(string))` | `{}` | no |
-| `records_txt` | Map of TXT records (text records) | `map(list(string))` | `{}` | no |
-| `records_wr` | Map of web redirect records (domain → redirect URL) | `map(string)` | `{}` | no |
-| `ttl` | Default TTL for all DNS records (in seconds) | `number` | `3600` | no |
-| `ttl_acm` | TTL for ACM validation records (in seconds) | `number` | `60` | no |
-| `ttl_ns` | TTL for NS records (in seconds) | `number` | `172800` | no |
+| <a name="input_enabled"></a> [enabled](#input\_enabled) | Whether to enable Route 53 resources | `bool` | `true` | no |
+| <a name="input_primary_domain"></a> [primary\_domain](#input\_primary\_domain) | The domain name to manage | `string` | n/a | yes |
+| <a name="input_records_a"></a> [records\_a](#input\_records\_a) | Map of A records (IPv4 addresses) | `map(list(string))` | `{}` | no |
+| <a name="input_records_aaaa"></a> [records\_aaaa](#input\_records\_aaaa) | Map of AAAA records (IPv6 addresses) | `map(list(string))` | `{}` | no |
+| <a name="input_records_caa"></a> [records\_caa](#input\_records\_caa) | Map of CAA records (Certificate Authority Authorization) | `map(list(string))` | `{}` | no |
+| <a name="input_records_cname"></a> [records\_cname](#input\_records\_cname) | Map of CNAME records (canonical name aliases) | `map(list(string))` | `{}` | no |
+| <a name="input_records_mx"></a> [records\_mx](#input\_records\_mx) | Map of MX records (mail exchange) | `map(list(string))` | `{}` | no |
+| <a name="input_records_ns"></a> [records\_ns](#input\_records\_ns) | Map of NS records (name server delegation) | `map(list(string))` | `{}` | no |
+| <a name="input_records_txt"></a> [records\_txt](#input\_records\_txt) | Map of TXT records (text records) | `map(list(string))` | `{}` | no |
+| <a name="input_records_wr"></a> [records\_wr](#input\_records\_wr) | Map of web redirect records (domain -> redirect URL) | `map(string)` | `{}` | no |
+| <a name="input_ttl"></a> [ttl](#input\_ttl) | Default TTL for all DNS records (in seconds) | `number` | `3600` | no |
+| <a name="input_ttl_acm"></a> [ttl\_acm](#input\_ttl\_acm) | TTL for ACM validation records (in seconds) | `number` | `60` | no |
+| <a name="input_ttl_ns"></a> [ttl\_ns](#input\_ttl\_ns) | TTL for NS records (in seconds) | `number` | `172800` | no |
 
-### Outputs
+## Outputs
 
 | Name | Description |
 |------|-------------|
-| `this_route53_zone_zone_id` | Zone ID of Route53 zone |
-| `this_route53_zone_name_servers` | Name servers of Route53 zone |
+| <a name="output_this_route53_zone_name_servers"></a> [this\_route53\_zone\_name\_servers](#output\_this\_route53\_zone\_name\_servers) | Name servers of Route53 zone |
+| <a name="output_this_route53_zone_zone_id"></a> [this\_route53\_zone\_zone\_id](#output\_this\_route53\_zone\_zone\_id) | Zone ID of Route53 zone |
 <!-- END_TF_DOCS -->
 
 ## Supported Record Types
