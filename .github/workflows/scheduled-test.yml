@@ -34,6 +34,10 @@ jobs:
         with:
           terraform_version: 1.0.0
 
+      - name: Update incompatible Go modules
+        working-directory: test
+        run: go get google.golang.org/api@latest && go mod tidy
+
       - name: Download Go Modules
         working-directory: test
         run: go mod download
