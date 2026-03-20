@@ -20,7 +20,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.24'
+          go-version: '1.25'
       
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -33,6 +33,10 @@ jobs:
         uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.0.0
+
+      - name: Update incompatible Go modules
+        working-directory: test
+        run: go get google.golang.org/api@latest && go mod tidy
 
       - name: Download Go Modules
         working-directory: test
