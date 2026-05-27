@@ -1,3 +1,43 @@
+# CloudFront Origin Access Control
+# Authenticates CloudFront to the private S3 bucket using SigV4 signing.
+# The S3 origin is never actually reached (the CloudFront Function short-circuits all requests),
+# but OAC ensures the origin remains inaccessible if the function were ever disabled.
+resource "aws_cloudfront_origin_access_control" "records_wr" {
+  for_each = var.records_wr
+
+  name                              = "oac-${each.key}"
+  description                       = "OAC for ${each.key} web redirect bucket"
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
+}
+
+# CloudFront Function to perform HTTPS redirect at the viewer-request stage.
+# The function intercepts every viewer request and returns a 301 immediately,
+# so the S3 origin is never reached.
+# Function name constraints: max 64 chars, only [a-zA-Z0-9-_] allowed.
+resource "aws_cloudfront_function" "records_wr" {
+  for_each = var.records_wr
+
+  name    = "redirect-${replace(each.key, ".", "-")}"
+  runtime = "cloudfront-js-2.0"
+  comment = "Redirect ${each.key} to https://${each.value}"
+  publish = true
+
+  code = <<-EOT
+    function handler(event) {
+        var request = event.request;
+        return {
+            statusCode: 301,
+            statusDescription: 'Moved Permanently',
+            headers: {
+                'location': { value: 'https://${each.value}' + request.uri }
+            }
+        };
+    }
+  EOT
+}
+
 # tfsec:ignore:AWS045 - CloudFront access logging not required for simple redirect use case
 # tfsec:ignore:AWS071 - WAF not required for simple redirect distributions
 resource "aws_cloudfront_distribution" "records_wr" {
@@ -9,34 +49,17 @@ resource "aws_cloudfront_distribution" "records_wr" {
   price_class  = "PriceClass_100" # US, Canada, and Europe
 
   origin {
-    origin_id   = "origin-${each.key}"
-    domain_name = aws_s3_bucket_website_configuration.records_wr[each.key].website_endpoint
-
-    # Use custom_origin_config instead of s3_origin_config because:
-    # 1. S3 website endpoints don't support HTTPS origins
-    # 2. S3 website hosting is required for proper redirect behavior
-    # 3. This allows CloudFront to fetch from the S3 website endpoint over HTTP
-    custom_origin_config {
-      origin_protocol_policy = "http-only"
-      http_port              = "80"
-      https_port             = "443"
-      origin_ssl_protocols   = ["TLSv1.2"]
-    }
-
-    # Authenticate CloudFront requests to S3 using custom User-Agent header
-    # This acts as a shared secret between CloudFront and S3 bucket policy
-    custom_header {
-      name  = "User-Agent"
-      value = base64sha512("REFER-SECRET-19265125-${each.key}-43568442")
-    }
+    origin_id                = "origin-${each.key}"
+    domain_name              = aws_s3_bucket.records_wr[each.key].bucket_regional_domain_name
+    origin_access_control_id = aws_cloudfront_origin_access_control.records_wr[each.key].id
   }
 
   default_cache_behavior {
     target_origin_id = "origin-${each.key}"
-    allowed_methods  = ["DELETE", "GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT"]
+    allowed_methods  = ["GET", "HEAD"]
     cached_methods   = ["GET", "HEAD"]
     compress         = true
-    # tfsec:ignore:AWS020 - Allow HTTP for redirect use case (CloudFront handles HTTPS)
+    # tfsec:ignore:AWS020 - HTTP viewer requests are redirected to HTTPS target by the CloudFront Function
     # tfsec:ignore:AWS072 - Same as AWS020
     viewer_protocol_policy = "allow-all"
     min_ttl                = 0
@@ -49,6 +72,12 @@ resource "aws_cloudfront_distribution" "records_wr" {
       cookies {
         forward = "none"
       }
+    }
+
+    # Intercept all viewer requests and return a 301 before the origin is ever contacted
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.records_wr[each.key].arn
     }
   }
 
