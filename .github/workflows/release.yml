@@ -10,6 +10,18 @@ on:
     paths:
       - '**.tf'
       - '!example/**.tf'
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version bump type'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - patch
+          - minor
+          - major
 
 jobs:
   release:
@@ -44,6 +56,22 @@ jobs:
           # Check commit messages since last tag for version bump hints
           COMMITS=$(git log $LATEST_TAG..HEAD --pretty=format:"%s" 2>/dev/null || git log --pretty=format:"%s")
           
+          # Use manual bump type if provided, otherwise detect from commits
+          MANUAL_BUMP="${{ github.event.inputs.bump_type }}"
+          if [ "$MANUAL_BUMP" != "auto" ] && [ -n "$MANUAL_BUMP" ]; then
+            BUMP_TYPE="$MANUAL_BUMP"
+            case "$BUMP_TYPE" in
+              major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+              minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+              patch) PATCH=$((PATCH + 1)) ;;
+            esac
+            NEW_VERSION="v$MAJOR.$MINOR.$PATCH"
+            echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+            echo "bump_type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+            echo "New version: $NEW_VERSION (manual ${BUMP_TYPE} bump)"
+            exit 0
+          fi
+
           # Determine bump type based on commit messages
           if echo "$COMMITS" | grep -qiE "^BREAKING CHANGE:|^[a-z]+!:"; then
             # Major version bump for breaking changes
