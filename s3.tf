@@ -50,6 +50,23 @@ resource "aws_s3_bucket_policy" "records_wr" {
             "aws:SourceArn" = aws_cloudfront_distribution.records_wr[each.key].arn
           }
         }
+      },
+      {
+        # Deny all non-HTTPS requests to the bucket (satisfies HTTPS-only transit requirements).
+        # CloudFront OAC always communicates with S3 over HTTPS, so this never blocks legitimate access.
+        Sid       = "DenyNonHTTPS"
+        Effect    = "Deny"
+        Principal = "*"
+        Action    = "s3:*"
+        Resource = [
+          aws_s3_bucket.records_wr[each.key].arn,
+          "${aws_s3_bucket.records_wr[each.key].arn}/*"
+        ]
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
+        }
       }
     ]
   })
