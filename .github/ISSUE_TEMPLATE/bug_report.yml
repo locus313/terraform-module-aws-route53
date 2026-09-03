@@ -1,0 +1,65 @@
+name: Bug Report
+description: Report a problem with the Route53 Terraform module
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out the details below.
+
+  - type: input
+    id: module-version
+    attributes:
+      label: Module version
+      description: The version (git tag) of `locus313/route53/aws` you are using
+      placeholder: v1.4.2
+    validations:
+      required: true
+
+  - type: input
+    id: terraform-version
+    attributes:
+      label: Terraform version
+      description: Output of `terraform version`
+      placeholder: Terraform v1.9.0
+    validations:
+      required: true
+
+  - type: input
+    id: aws-provider-version
+    attributes:
+      label: AWS provider version
+      placeholder: ">= 4.0, resolved to 5.62.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Relevant module configuration
+      description: A minimal `module` block that reproduces the issue (redact real domains/credentials)
+      render: hcl
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the full error output from `terraform plan`/`apply` if applicable
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Anything else that might help (e.g. `records_wr` involved, DNS record type, region)

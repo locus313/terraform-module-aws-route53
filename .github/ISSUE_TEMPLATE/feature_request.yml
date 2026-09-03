@@ -1,0 +1,43 @@
+name: Feature Request
+description: Suggest a new capability for the Route53 Terraform module
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement! See [CONTRIBUTING.md](../../CONTRIBUTING.md) for the
+        commit convention and PR process used once this is implemented.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: What are you trying to do that the module doesn't support today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Sketch the variable/resource changes you have in mind, if known
+      render: hcl
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - DNS records (A/AAAA/CNAME/MX/TXT/NS/CAA)
+        - Web redirect (records_wr / ACM / CloudFront / S3)
+        - Variables / outputs
+        - CI/CD or testing
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

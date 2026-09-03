@@ -1,0 +1,42 @@
+name: Copilot Setup Steps
+
+# Prepares the Copilot coding agent environment to match CI (see lint.yml,
+# scheduled-test.yml). Runs whenever this file changes and can be triggered
+# manually to verify the setup steps still work.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+permissions:
+  contents: read
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.0.0
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: '1.25'
+
+      - name: Download Go modules
+        working-directory: test
+        run: go mod download
+
+      - name: Terraform init (example)
+        working-directory: example
+        run: terraform init -input=false
