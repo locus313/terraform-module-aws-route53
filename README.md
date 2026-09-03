@@ -19,7 +19,7 @@ This module creates and manages AWS Route53 resources with a focus on flexibilit
 
 - 🔐 **Automatic SSL certificates** via AWS Certificate Manager
 - 🌐 **CloudFront distribution** for global edge delivery
-- 📦 **S3 bucket** configured for website redirection
+- 📦 **Private S3 bucket** as a CloudFront origin placeholder (no data ever stored or served)
 - ✅ **DNS validation** handled automatically
 
 ## Features
@@ -388,9 +388,11 @@ No modules.
 - `aws_route53_record` - DNS records of various types
 
 ### For Web Redirects (`records_wr`)
-- `aws_s3_bucket` - Bucket configured for website redirect
-- `aws_s3_bucket_policy` - Bucket policy to allow CloudFront access
-- `aws_s3_bucket_website_configuration` - Redirect configuration
+- `aws_s3_bucket` - Private placeholder bucket used only as a CloudFront origin (no objects stored)
+- `aws_s3_bucket_public_access_block` - Blocks all public access to the placeholder bucket
+- `aws_s3_bucket_policy` - Grants read access to the specific CloudFront distribution only (via OAC `aws:SourceArn`), denies non-HTTPS requests
+- `aws_cloudfront_origin_access_control` - OAC used to authenticate CloudFront to the private S3 origin
+- `aws_cloudfront_function` - Issues the HTTPS 301 redirect at the `viewer-request` stage, before the origin is contacted
 - `aws_acm_certificate` - SSL certificate (in us-east-1)
 - `aws_acm_certificate_validation` - DNS validation
 - `aws_cloudfront_distribution` - CDN for HTTPS redirect
