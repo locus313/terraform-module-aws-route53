@@ -3,6 +3,7 @@
 [![Terraform](https://img.shields.io/badge/Terraform->=1.0-623CE4?style=flat-square&logo=terraform)](https://www.terraform.io)
 [![AWS Provider](https://img.shields.io/badge/AWS_Provider->=4.0-FF9900?style=flat-square&logo=amazon-aws)](https://registry.terraform.io/providers/hashicorp/aws/latest)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
+[![AI Ready](https://img.shields.io/badge/AI--Ready-yes-brightgreen?style=flat)](https://github.com/johnpapa/ai-ready)
 
 ⭐ If you find this module useful, star it on GitHub — it helps a lot!
 
@@ -480,6 +481,10 @@ terraform plan
 
 > [!TIP]
 > After creating a hosted zone, update your domain registrar's name servers to the values in `this_route53_zone_name_servers` output.
+
+## Contributing
+
+Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for the commit message convention, development workflow, and how to run tests.
 
 ## Author
 

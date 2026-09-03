@@ -85,6 +85,22 @@ When adding features: Update both test suites + `example/main.tf` demonstration.
 
 **Do not remove** without understanding these are empty redirect buckets.
 
+## Maintenance Matrix
+
+What to update together when changing different parts of this module:
+
+| If you change... | Also update... |
+|---|---|
+| A DNS record variable in `variables.tf` (new/renamed record type) | Matching resource in `main.tf`, demonstration in `example/main.tf`, assertion in `test/terraform_module_test.go`, `README.md` usage examples (not the auto-generated API table) |
+| `records_wr` structure (`variables.tf`, `main.tf`) | `cert.tf`, `cloudfront.tf`, `s3.tf` (all consume `records_wr` keys), `example/main.tf`, Terratest assertions, `compliance/features/example.feature` |
+| TTL variables (`ttl`, `ttl_acm`, `ttl_ns`) | Any `aws_route53_record` resource using that TTL in `main.tf`, compliance TTL policy checks in `compliance/features/example.feature` |
+| `versions.tf` (provider/Terraform version bumps) | `example/provider.tf` (must satisfy the same constraints), CI workflows pinning `terraform_version` (`lint.yml`, `scheduled-test.yml`) |
+| `cloudfront.tf` / `s3.tf` origin or bucket policy | `tfsec` ignore comments and their justification (do not silently drop), `compliance/features/example.feature` if a policy check depends on it |
+| `outputs.tf` | `README.md` API reference is regenerated automatically by `documentation.yml` — no manual edit needed, but downstream consumers referencing output names should be considered |
+| `test/go.mod` Go or dependency versions | `.github/workflows/scheduled-test.yml` `setup-go` version, `test/go.sum` (via `go mod tidy`) |
+| Commit message conventions / release logic | `CONTRIBUTING.md` commit type table, `.github/workflows/release.yml` bump-detection regex |
+| Anything affecting AI agent guidance | `AGENTS.md` and this file — keep both in sync, they serve different tools but describe the same repo |
+
 ## Common Errors
 
 1. **"Provider not configured"**: Missing `providers = { aws.acm = aws.acm }` or ACM provider not in us-east-1

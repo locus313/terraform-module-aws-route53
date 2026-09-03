@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Module documentation
+    url: https://registry.terraform.io/modules/locus313/aws-route53/module/latest
+    about: Terraform Registry docs, including the full input/output reference.
