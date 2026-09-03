@@ -4,7 +4,7 @@
 
 Reusable Terraform module for Route53 hosted zones and DNS records with an HTTPS web redirect feature (`records_wr`). Creates ONE hosted zone per invocation and manages multiple DNS records via `for_each` loops.
 
-**Web redirect infrastructure** (`records_wr`): Single input creates S3 bucket → ACM certificate → CloudFront → Route53 A record alias for HTTPS redirects.
+**Web redirect infrastructure** (`records_wr`): Single input creates a private S3 bucket (CloudFront origin placeholder only) → ACM certificate → CloudFront (with OAC + a CloudFront Function that issues the 301 redirect) → Route53 A record alias for HTTPS redirects.
 
 ## Critical Multi-Provider Setup
 
@@ -32,10 +32,10 @@ All resources use `aws_route53_zone.this[0].zone_id` (note `[0]`) because zone u
 
 ### Web Redirect Architecture (records_wr)
 
-**Why CloudFront uses `custom_origin_config` not `s3_origin_config`**:
-- S3 website endpoints (`redirect_all_requests_to`) don't support HTTPS origins
-- Must use `origin_protocol_policy = "http-only"` (AWS limitation, not choice)
-- User-Agent header (`base64sha512("REFER-SECRET-...")`) authenticates CloudFront→S3 (see `s3.tf` bucket policy)
+**Why the redirect happens in a CloudFront Function, not S3 website hosting**:
+- The S3 bucket (`s3.tf`) is a private placeholder origin — no objects are ever stored or served, and it has `block_public_acls`/`block_public_policy` fully enabled
+- CloudFront uses Origin Access Control (OAC, SigV4 signing) to authenticate to S3; the bucket policy grants `s3:GetObject` only to the specific distribution via `aws:SourceArn` (see `s3.tf`), plus a deny-non-HTTPS statement
+- A `viewer-request` CloudFront Function (`cloudfront.tf`) intercepts every request and returns a 301 to the target URL before the origin is ever contacted — the S3 origin exists only to satisfy CloudFront's requirement for one, and OAC keeps it inaccessible if the function were ever disabled
 
 **Certificate validation complexity** (`main.tf:records_wr_validation`):
 ```hcl
@@ -76,12 +76,14 @@ When adding features: Update both test suites + `example/main.tf` demonstration.
 
 ## Security Annotations
 
-`tfsec` ignores are intentional for redirect-only S3 buckets (no data storage):
-- `AWS002`/`AWS017` - Encryption not needed
-- `AWS020`/`AWS072` - HTTP viewer protocol allowed
-- `AWS045` - CloudFront logging not required
+`tfsec` ignores are intentional for redirect-only S3 buckets and distributions (no data stored, redirect handled entirely by a CloudFront Function before the origin is reached):
+- `AWS002`/`AWS017` - Encryption not needed (placeholder bucket, no data stored)
+- `AWS077` - S3 versioning not needed (placeholder bucket, no objects stored)
+- `AWS098` - S3 access logging not needed (placeholder bucket, no objects stored)
+- `AWS020`/`AWS072` - HTTP viewer protocol allowed (CloudFront Function issues the HTTPS redirect at `viewer-request`, so `allow-all` never actually serves content over HTTP)
+- `AWS021` - TLSv1.2_2021 minimum protocol version is acceptable for this use case
+- `AWS045` - CloudFront access logging not required
 - `AWS071` - WAF not required
-- `AWS077` - S3 versioning not needed
 
 **Do not remove** without understanding these are empty redirect buckets.
 
@@ -106,4 +108,4 @@ What to update together when changing different parts of this module:
 1. **"Provider not configured"**: Missing `providers = { aws.acm = aws.acm }` or ACM provider not in us-east-1
 2. **Validation from module root fails**: Must run from `example/` directory (see Development Workflows)
 3. **Wrong zone reference**: Use `this[0]` not `this` for zone resource access
-4. **S3 origin errors**: CloudFront must use `custom_origin_config` for S3 website endpoints
+4. **S3 access denied via CloudFront**: The bucket is private; access is only via OAC scoped to the distribution's `aws:SourceArn` — do not add `s3_origin_config`/website hosting or public bucket policies

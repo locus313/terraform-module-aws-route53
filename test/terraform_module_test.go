@@ -1,19 +1,19 @@
 package test
 
 import (
-  "testing"
-  "github.com/gruntwork-io/terratest/modules/terraform"
-  "github.com/stretchr/testify/assert"
+	"github.com/gruntwork-io/terratest/modules/terraform"
+	"github.com/stretchr/testify/assert"
+	"testing"
 )
 
 func TestTerraformRoute53Module(t *testing.T) {
-  terraformOptions := &terraform.Options{
-    TerraformDir: "../example",
-  }
+	terraformOptions := &terraform.Options{
+		TerraformDir: "../example",
+	}
 
-  defer terraform.Destroy(t, terraformOptions)
-  terraform.InitAndApply(t, terraformOptions)
+	defer terraform.Destroy(t, terraformOptions)
+	terraform.InitAndApply(t, terraformOptions)
 
-  zoneID := terraform.Output(t, terraformOptions, "zone_id")
-  assert.NotEmpty(t, zoneID)
+	zoneID := terraform.Output(t, terraformOptions, "zone_id")
+	assert.NotEmpty(t, zoneID)
 }

@@ -13,7 +13,7 @@ Reusable Terraform module (published to the [Terraform Registry](https://registr
 | [main.tf](main.tf) | Hosted zone + all `aws_route53_record` resources (`for_each` per record type) |
 | [cert.tf](cert.tf) | ACM certificate resources for `records_wr` (must use `aws.acm` provider, us-east-1) |
 | [cloudfront.tf](cloudfront.tf) | CloudFront distributions fronting the redirect S3 buckets |
-| [s3.tf](s3.tf) | S3 buckets configured for website redirection, bucket policy gated by CloudFront User-Agent secret |
+| [s3.tf](s3.tf) | Private S3 bucket used only as a CloudFront origin placeholder — no objects stored; access restricted to the CloudFront distribution via Origin Access Control (OAC) |
 | [variables.tf](variables.tf) | All module inputs — `map(list(string))` for standard records, `map(string)` for `records_wr` |
 | [outputs.tf](outputs.tf) | Module outputs (zone id, name servers, etc.) |
 | [versions.tf](versions.tf) | Provider/version constraints, declares the `aws.acm` configuration alias |
@@ -64,7 +64,7 @@ Terratest and compliance tests also run nightly via [.github/workflows/scheduled
 
 - Zone resource uses `count`, not `for_each` — always reference it as `aws_route53_zone.this[0]`.
 - Standard DNS record variables are `map(list(string))`; `records_wr` is `map(string)` (one redirect URL per domain).
-- CloudFront origins for `records_wr` use `custom_origin_config` with `origin_protocol_policy = "http-only"` — S3 website endpoints cannot serve HTTPS origins, so this is an AWS constraint, not a stylistic choice.
+- CloudFront distributions for `records_wr` front a private S3 origin secured with Origin Access Control (OAC); a `viewer-request` CloudFront Function (`cloudfront.tf`) returns the 301 redirect before the S3 origin is ever contacted — the bucket never serves content or uses website hosting.
 - ACM certificate validation records are built by flattening `domain_validation_options` across all `aws_acm_certificate.records_wr` instances (see the `for_each` in [main.tf](main.tf)) to produce one validation record per unique domain.
 - `tfsec` ignores in `s3.tf`/`cloudfront.tf` (e.g. `AWS002`, `AWS020`, `AWS045`, `AWS071`, `AWS077`) are intentional for these empty, redirect-only resources — do not remove them without understanding why (see [.github/copilot-instructions.md](.github/copilot-instructions.md#security-annotations)).
 
@@ -98,5 +98,5 @@ There is no committed `CHANGELOG.md` — the [release workflow](.github/workflow
 1. **"Provider not configured"** — missing `providers = { aws.acm = aws.acm }` in the consuming module, or the aliased provider isn't pinned to `us-east-1`.
 2. **Validation fails at repo root** — must run `terraform init`/`validate`/`plan` from `example/`, not the module root.
 3. **Wrong zone reference** — use `aws_route53_zone.this[0]`, not `aws_route53_zone.this`.
-4. **CloudFront/S3 origin errors** — must use `custom_origin_config`, not `s3_origin_config`, for S3 website endpoints.
+4. **CloudFront/S3 access errors** — the S3 bucket is private; only the matching CloudFront distribution can read it via OAC (`aws:SourceArn` condition in the bucket policy). Do not switch to S3 website hosting or public bucket policies.
 5. **Editing the generated API reference table in README.md** — it's overwritten by `terraform-docs` on the next PR; edit variable/output descriptions in `.tf` files instead.
