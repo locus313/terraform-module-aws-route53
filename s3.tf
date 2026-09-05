@@ -6,14 +6,15 @@
 # tfsec:ignore:AWS077 - Versioning not required for empty placeholder bucket (no objects stored)
 # tfsec:ignore:AWS098 - Access logging not required for empty placeholder bucket
 resource "aws_s3_bucket" "records_wr" {
-  for_each = var.records_wr
+  for_each = local.records_wr
 
   bucket = each.key
+  tags   = var.tags
 }
 
 # Block all public access - bucket is private and accessed only via CloudFront OAC
 resource "aws_s3_bucket_public_access_block" "records_wr" {
-  for_each = var.records_wr
+  for_each = local.records_wr
 
   bucket = aws_s3_bucket.records_wr[each.key].id
 
@@ -27,7 +28,7 @@ resource "aws_s3_bucket_public_access_block" "records_wr" {
 # This is NOT a public policy - it uses aws:SourceArn to restrict access to this
 # distribution only, and is unaffected by the block_public_policy setting above.
 resource "aws_s3_bucket_policy" "records_wr" {
-  for_each = var.records_wr
+  for_each = local.records_wr
 
   bucket = aws_s3_bucket.records_wr[each.key].id
 
