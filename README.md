@@ -372,7 +372,8 @@ No modules.
 | <a name="input_records_mx"></a> [records\_mx](#input\_records\_mx) | Map of MX records (mail exchange) | `map(list(string))` | `{}` | no |
 | <a name="input_records_ns"></a> [records\_ns](#input\_records\_ns) | Map of NS records (name server delegation) | `map(list(string))` | `{}` | no |
 | <a name="input_records_txt"></a> [records\_txt](#input\_records\_txt) | Map of TXT records (text records) | `map(list(string))` | `{}` | no |
-| <a name="input_records_wr"></a> [records\_wr](#input\_records\_wr) | Map of web redirect records (domain -> redirect URL) | `map(string)` | `{}` | no |
+| <a name="input_records_wr"></a> [records\_wr](#input\_records\_wr) | Map of web redirect records (domain -> full destination URL, e.g. https://example.com/path) | `map(string)` | `{}` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to apply to all taggable resources created by this module | `map(string)` | `{}` | no |
 | <a name="input_ttl"></a> [ttl](#input\_ttl) | Default TTL for all DNS records (in seconds) | `number` | `3600` | no |
 | <a name="input_ttl_acm"></a> [ttl\_acm](#input\_ttl\_acm) | TTL for ACM validation records (in seconds) | `number` | `60` | no |
 | <a name="input_ttl_ns"></a> [ttl\_ns](#input\_ttl\_ns) | TTL for NS records (in seconds) | `number` | `172800` | no |
@@ -381,6 +382,10 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_records_wr_certificate_arns"></a> [records\_wr\_certificate\_arns](#output\_records\_wr\_certificate\_arns) | Map of records\_wr domain to validated ACM certificate ARN |
+| <a name="output_records_wr_cloudfront_distribution_domain_names"></a> [records\_wr\_cloudfront\_distribution\_domain\_names](#output\_records\_wr\_cloudfront\_distribution\_domain\_names) | Map of records\_wr domain to CloudFront distribution domain name |
+| <a name="output_records_wr_cloudfront_distribution_ids"></a> [records\_wr\_cloudfront\_distribution\_ids](#output\_records\_wr\_cloudfront\_distribution\_ids) | Map of records\_wr domain to CloudFront distribution ID |
+| <a name="output_records_wr_s3_bucket_names"></a> [records\_wr\_s3\_bucket\_names](#output\_records\_wr\_s3\_bucket\_names) | Map of records\_wr domain to S3 origin bucket name |
 | <a name="output_this_route53_zone_name_servers"></a> [this\_route53\_zone\_name\_servers](#output\_this\_route53\_zone\_name\_servers) | Name servers of Route53 zone |
 | <a name="output_this_route53_zone_zone_id"></a> [this\_route53\_zone\_zone\_id](#output\_this\_route53\_zone\_zone\_id) | Zone ID of Route53 zone |
 <!-- END_TF_DOCS -->
