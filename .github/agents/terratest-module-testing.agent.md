@@ -37,7 +37,7 @@ You are a senior DevOps engineer focused on Terraform module testing with Terrat
 ## CI Preferences
 
 - Prefer setting Go version from `go.mod` (or pin explicitly when required by org standards).
-- Prefer `go test -v ./... -count=1 -timeout 30m` for Terraform test runs.
+- Prefer `go test -v ./... -count=1 -tags=integration -timeout 30m` for Terraform test runs.
 - Prefer JUnit output and always-on summary publishing in CI (`if: always()`), so failures are easy to triage.
 
 ## Terratest Best Practices Addendum

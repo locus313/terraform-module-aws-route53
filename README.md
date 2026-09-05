@@ -294,6 +294,27 @@ module "complete_example" {
 }
 ```
 
+### Tagging
+
+Apply a common set of tags to every taggable resource the module creates (the hosted zone, and — when `records_wr` is set — the ACM certificate, CloudFront distribution, and S3 origin bucket):
+
+```hcl
+module "example_com" {
+  source = "locus313/route53/aws"
+
+  providers = {
+    aws.acm = aws.acm
+  }
+
+  primary_domain = "example.com"
+
+  tags = {
+    Environment = "production"
+    ManagedBy   = "terraform"
+  }
+}
+```
+
 ## API Reference
 
 <!-- BEGIN_TF_DOCS -->
@@ -452,9 +473,13 @@ BREAKING CHANGE: module now requires AWS provider >= 5.0"
 This module includes both Go-based Terratest and compliance tests:
 
 ```bash
-# Run Terratest integration tests
+# Run fast unit tests (no AWS credentials needed)
 cd test
-go test -v -timeout 30m
+go test -v ./...
+
+# Run Terratest integration tests (requires AWS credentials)
+cd test
+go test -v -tags=integration -timeout 30m
 
 # Run compliance tests
 terraform-compliance -f compliance -p .
