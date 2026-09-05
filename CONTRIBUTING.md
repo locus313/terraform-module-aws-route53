@@ -162,7 +162,7 @@ terraform plan
 ```bash
 # Run Terratest integration tests (requires AWS credentials)
 cd test
-go test -v -timeout 30m
+go test -v -tags=integration -timeout 30m
 
 # Run compliance tests
 cd ..
@@ -190,7 +190,7 @@ If your change affects usage:
 
 ```bash
 cd test
-go test -v -timeout 30m
+go test -v -tags=integration -timeout 30m
 ```
 
 This will:

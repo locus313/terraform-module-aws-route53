@@ -3,7 +3,7 @@
 # The S3 origin is never actually reached (the CloudFront Function short-circuits all requests),
 # but OAC ensures the origin remains inaccessible if the function were ever disabled.
 resource "aws_cloudfront_origin_access_control" "records_wr" {
-  for_each = var.records_wr
+  for_each = local.records_wr
 
   name                              = "oac-${each.key}"
   description                       = "OAC for ${each.key} web redirect bucket"
@@ -17,36 +17,30 @@ resource "aws_cloudfront_origin_access_control" "records_wr" {
 # so the S3 origin is never reached.
 # Function name constraints: max 64 chars, only [a-zA-Z0-9-_] allowed.
 resource "aws_cloudfront_function" "records_wr" {
-  for_each = var.records_wr
+  for_each = local.records_wr
 
   name    = "redirect-${replace(each.key, ".", "-")}"
   runtime = "cloudfront-js-2.0"
-  comment = "Redirect ${each.key} to https://${each.value}"
+  comment = "Redirect ${each.key} to ${each.value}"
   publish = true
 
-  code = <<-EOT
-    function handler(event) {
-        var request = event.request;
-        return {
-            statusCode: 301,
-            statusDescription: 'Moved Permanently',
-            headers: {
-                'location': { value: 'https://${each.value}' + request.uri }
-            }
-        };
-    }
-  EOT
+  # each.value is already a complete URL (validated in variables.tf), so it is rendered
+  # as-is - it must not be treated as a bare hostname or have the visitor path appended.
+  code = templatefile("${path.module}/templates/redirect-function.js.tftpl", {
+    target_url = each.value
+  })
 }
 
 # tfsec:ignore:AWS045 - CloudFront access logging not required for simple redirect use case
 # tfsec:ignore:AWS071 - WAF not required for simple redirect distributions
 resource "aws_cloudfront_distribution" "records_wr" {
-  for_each = var.records_wr
+  for_each = local.records_wr
 
   enabled      = true
   http_version = "http2"
   aliases      = [each.key]
   price_class  = "PriceClass_100" # US, Canada, and Europe
+  tags         = var.tags
 
   origin {
     origin_id                = "origin-${each.key}"

@@ -40,7 +40,7 @@ jobs:
 
       - name: Run Terratest
         working-directory: test
-        run: go test -v
+        run: go test -v -tags=integration
 
   terraform-compliance:
     name: Run Terraform Compliance

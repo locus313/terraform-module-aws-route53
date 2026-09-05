@@ -9,7 +9,7 @@ variable "primary_domain" {
   type        = string
 
   validation {
-    condition     = can(regex("^[a-z0-9][a-z0-9-]{0,61}[a-z0-9]?\\.[a-z]{2,}$", var.primary_domain))
+    condition     = can(regex("(?i)^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,}$", var.primary_domain))
     error_message = "The primary_domain must be a valid domain name."
   }
 }
@@ -58,8 +58,13 @@ variable "records_ns" {
 
 variable "records_wr" {
   type        = map(string)
-  description = "Map of web redirect records (domain -> redirect URL)"
+  description = "Map of web redirect records (domain -> full destination URL, e.g. https://example.com/path)"
   default     = {}
+
+  validation {
+    condition     = alltrue([for url in values(var.records_wr) : can(regex("^https://", url))])
+    error_message = "Each records_wr value must be a full URL starting with https://."
+  }
 }
 
 variable "ttl" {
@@ -93,4 +98,10 @@ variable "ttl_ns" {
     condition     = var.ttl_ns >= 60 && var.ttl_ns <= 172800
     error_message = "NS record TTL must be between 60 and 172800 (2 days) seconds."
   }
+}
+
+variable "tags" {
+  description = "A map of tags to apply to all taggable resources created by this module"
+  type        = map(string)
+  default     = {}
 }

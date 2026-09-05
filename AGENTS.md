@@ -11,14 +11,16 @@ Reusable Terraform module (published to the [Terraform Registry](https://registr
 | Path | Purpose |
 |------|---------|
 | [main.tf](main.tf) | Hosted zone + all `aws_route53_record` resources (`for_each` per record type) |
+| [locals.tf](locals.tf) | Gates every record map on `var.enabled` so disabling the module empties all `for_each`s instead of erroring on `aws_route53_zone.this[0]` |
 | [cert.tf](cert.tf) | ACM certificate resources for `records_wr` (must use `aws.acm` provider, us-east-1) |
-| [cloudfront.tf](cloudfront.tf) | CloudFront distributions fronting the redirect S3 buckets |
+| [cloudfront.tf](cloudfront.tf) | CloudFront distributions fronting the redirect S3 buckets; the redirect function body lives in `templates/redirect-function.js.tftpl` |
 | [s3.tf](s3.tf) | Private S3 bucket used only as a CloudFront origin placeholder — no objects stored; access restricted to the CloudFront distribution via Origin Access Control (OAC) |
 | [variables.tf](variables.tf) | All module inputs — `map(list(string))` for standard records, `map(string)` for `records_wr` |
-| [outputs.tf](outputs.tf) | Module outputs (zone id, name servers, etc.) |
+| [outputs.tf](outputs.tf) | Module outputs (zone id, name servers, `records_wr` CloudFront/ACM/S3 identifiers) |
 | [versions.tf](versions.tf) | Provider/version constraints, declares the `aws.acm` configuration alias |
+| [templates/](templates/) | External template files rendered via `templatefile()` (currently just the `records_wr` CloudFront Function body) |
 | [example/](example/) | Working example consumer — the **only** place `terraform validate`/`plan` can run (see Build & Run) |
-| [test/](test/) | Go Terratest integration tests using `example/` as the fixture |
+| [test/](test/) | Go tests: `cloudfront_function_test.go` (fast, no AWS creds) + `terraform_module_test.go` (build-tagged `integration`, real Terratest against `example/`) |
 | [compliance/](compliance/) | `terraform-compliance` Gherkin feature files (BDD policy checks) |
 | [.github/instructions/](.github/instructions/) | Path-scoped Copilot instructions (Terraform, Go, security, CI) |
 | [.github/agents/](.github/agents/) | Custom Copilot agent personas (Terraform planning/implementation/review, Terratest, AWS, GitHub Actions) |
@@ -49,9 +51,12 @@ terraform plan
 ## Testing
 
 ```bash
+# Fast unit tests (no AWS credentials, runs on every PR via lint.yml)
+cd test && go test -v ./...
+
 # Terratest integration tests (requires AWS credentials — applies real resources)
 cd test
-go test -v -timeout 30m
+go test -v -tags=integration -timeout 30m
 
 # Compliance (BDD policy) tests — requires an example/ plan
 cd example && terraform init -backend=false && terraform plan -out=tfplan
@@ -63,7 +68,7 @@ Terratest and compliance tests also run nightly via [.github/workflows/scheduled
 ## Key Patterns and Conventions
 
 - Zone resource uses `count`, not `for_each` — always reference it as `aws_route53_zone.this[0]`.
-- Standard DNS record variables are `map(list(string))`; `records_wr` is `map(string)` (one redirect URL per domain).
+- Standard DNS record variables are `map(list(string))`; `records_wr` is `map(string)` (one redirect URL per domain, must be a full URL starting with `https://`).
 - CloudFront distributions for `records_wr` front a private S3 origin secured with Origin Access Control (OAC); a `viewer-request` CloudFront Function (`cloudfront.tf`) returns the 301 redirect before the S3 origin is ever contacted — the bucket never serves content or uses website hosting.
 - ACM certificate validation records are built by flattening `domain_validation_options` across all `aws_acm_certificate.records_wr` instances (see the `for_each` in [main.tf](main.tf)) to produce one validation record per unique domain.
 - `tfsec` ignores in `s3.tf`/`cloudfront.tf` (e.g. `AWS002`, `AWS020`, `AWS045`, `AWS071`, `AWS077`) are intentional for these empty, redirect-only resources — do not remove them without understanding why (see [.github/copilot-instructions.md](.github/copilot-instructions.md#security-annotations)).
@@ -72,7 +77,7 @@ Terratest and compliance tests also run nightly via [.github/workflows/scheduled
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| [lint.yml](.github/workflows/lint.yml) | PR to `main` | `terraform fmt -check`, `terraform validate` in `example/` |
+| [lint.yml](.github/workflows/lint.yml) | PR to `main` | `terraform fmt -check`, `terraform validate` in `example/`, and the fast Go unit test suite |
 | [documentation.yml](.github/workflows/documentation.yml) | PR to `main` | Regenerates the README API reference table via `terraform-docs` |
 | [scheduled-test.yml](.github/workflows/scheduled-test.yml) | Nightly cron + manual | Terratest + terraform-compliance against real AWS resources |
 | [release.yml](.github/workflows/release.yml) | Push to `main` touching `**.tf` (excluding `example/`) | SemVer bump + tag + GitHub Release, derived from [Conventional Commits](https://www.conventionalcommits.org/) |

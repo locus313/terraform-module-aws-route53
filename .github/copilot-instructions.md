@@ -27,8 +27,11 @@ All resources use `aws_route53_zone.this[0].zone_id` (note `[0]`) because zone u
 
 ### DNS Record Variables
 - Standard records: `map(list(string))` - A, AAAA, CNAME, MX, TXT, NS, CAA
-- Web redirects: `map(string)` - single redirect URL per domain
+- Web redirects: `map(string)` - single destination URL per domain (must start with `https://`, enforced by a `variables.tf` validation block)
 - TTL variables: `var.ttl` (3600), `var.ttl_acm` (60), `var.ttl_ns` (172800)
+
+### Enabled Gating
+`locals.tf` collapses every `var.records_*` map to `{}` when `var.enabled = false`, so all `for_each`-based resources naturally create zero instances instead of erroring on `aws_route53_zone.this[0]`. Resources reference `local.records_*`, not `var.records_*` directly.
 
 ### Web Redirect Architecture (records_wr)
 
@@ -59,7 +62,10 @@ cd example && terraform validate
 cd example && terraform plan
 
 # Run Go tests (requires AWS credentials)
-cd test && go test -v -timeout 30m
+cd test && go test -v -tags=integration -timeout 30m
+
+# Run fast Go unit tests (no AWS credentials needed, runs on every PR)
+cd test && go test -v ./...
 
 # Run compliance tests
 terraform-compliance -f compliance -p .
@@ -69,7 +75,8 @@ terraform-compliance -f compliance -p .
 
 ## Testing
 
-**Terratest** (`test/terraform_module_test.go`): Go integration tests using `example/` as fixture
+**Fast unit tests** (`test/cloudfront_function_test.go`): No AWS credentials needed, runs on every PR via `lint.yml`. Covers the `templates/redirect-function.js.tftpl` rendering logic — add cases here for any redirect-logic change.
+**Terratest** (`test/terraform_module_test.go`, build-tagged `integration`): Go integration tests using `example/` as fixture. Only runs nightly (`scheduled-test.yml`) since it applies real AWS resources; requires `-tags=integration`.
 **Compliance** (`compliance/features/example.feature`): Gherkin BDD for TTL policy checks
 
 When adding features: Update both test suites + `example/main.tf` demonstration.
@@ -94,7 +101,7 @@ What to update together when changing different parts of this module:
 | If you change... | Also update... |
 |---|---|
 | A DNS record variable in `variables.tf` (new/renamed record type) | Matching resource in `main.tf`, demonstration in `example/main.tf`, assertion in `test/terraform_module_test.go`, `README.md` usage examples (not the auto-generated API table) |
-| `records_wr` structure (`variables.tf`, `main.tf`) | `cert.tf`, `cloudfront.tf`, `s3.tf` (all consume `records_wr` keys), `example/main.tf`, Terratest assertions, `compliance/features/example.feature` |
+| `records_wr` structure (`variables.tf`, `main.tf`) | `cert.tf`, `cloudfront.tf`, `s3.tf` (all consume `records_wr` keys), `templates/redirect-function.js.tftpl` (redirect logic), `test/cloudfront_function_test.go` (fast unit test), `example/main.tf`, Terratest assertions, `compliance/features/example.feature` |
 | TTL variables (`ttl`, `ttl_acm`, `ttl_ns`) | Any `aws_route53_record` resource using that TTL in `main.tf`, compliance TTL policy checks in `compliance/features/example.feature` |
 | `versions.tf` (provider/Terraform version bumps) | `example/provider.tf` (must satisfy the same constraints), CI workflows pinning `terraform_version` (`lint.yml`, `scheduled-test.yml`) |
 | `cloudfront.tf` / `s3.tf` origin or bucket policy | `tfsec` ignore comments and their justification (do not silently drop), `compliance/features/example.feature` if a policy check depends on it |
@@ -109,3 +116,4 @@ What to update together when changing different parts of this module:
 2. **Validation from module root fails**: Must run from `example/` directory (see Development Workflows)
 3. **Wrong zone reference**: Use `this[0]` not `this` for zone resource access
 4. **S3 access denied via CloudFront**: The bucket is private; access is only via OAC scoped to the distribution's `aws:SourceArn` — do not add `s3_origin_config`/website hosting or public bucket policies
+5. **`records_wr` validation error**: Values must be a full URL starting with `https://` (e.g. `https://example.com/path`), not a bare hostname — enforced by a `variables.tf` validation block
