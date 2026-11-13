@@ -385,6 +385,7 @@ No modules.
 | <a name="input_records_ns"></a> [records\_ns](#input\_records\_ns) | Map of NS records (name server delegation) | `map(list(string))` | `{}` | no |
 | <a name="input_records_txt"></a> [records\_txt](#input\_records\_txt) | Map of TXT records (text records) | `map(list(string))` | `{}` | no |
 | <a name="input_records_wr"></a> [records\_wr](#input\_records\_wr) | Map of web redirect records (domain -> full destination URL, e.g. https://example.com/path) | `map(string)` | `{}` | no |
+| <a name="input_records_wr_preserve_path"></a> [records\_wr\_preserve\_path](#input\_records\_wr\_preserve\_path) | Domains from records\_wr whose redirect should append the visitor's request path and query string to the destination URL (e.g. old.example.com/a?b=1 -> https://new.example.com/base/a?b=1) | `set(string)` | `[]` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | A map of tags to apply to all taggable resources created by this module | `map(string)` | `{}` | no |
 | <a name="input_ttl"></a> [ttl](#input\_ttl) | Default TTL for all DNS records (in seconds) | `number` | `3600` | no |
 | <a name="input_ttl_acm"></a> [ttl\_acm](#input\_ttl\_acm) | TTL for ACM validation records (in seconds) | `number` | `60` | no |
