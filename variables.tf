@@ -67,6 +67,12 @@ variable "records_wr" {
   }
 }
 
+variable "records_wr_preserve_path" {
+  type        = set(string)
+  description = "Domains from records_wr whose redirect should append the visitor's request path and query string to the destination URL (e.g. old.example.com/a?b=1 -> https://new.example.com/base/a?b=1)"
+  default     = []
+}
+
 variable "ttl" {
   description = "Default TTL for all DNS records (in seconds)"
   type        = number

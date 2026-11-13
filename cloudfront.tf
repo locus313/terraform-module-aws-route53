@@ -25,9 +25,11 @@ resource "aws_cloudfront_function" "records_wr" {
   publish = true
 
   # each.value is already a complete URL (validated in variables.tf), so it is rendered
-  # as-is - it must not be treated as a bare hostname or have the visitor path appended.
+  # as-is - it must not be treated as a bare hostname. The visitor path is only appended
+  # when the domain is listed in records_wr_preserve_path.
   code = templatefile("${path.module}/templates/redirect-function.js.tftpl", {
-    target_url = each.value
+    target_url    = each.value
+    preserve_path = contains(var.records_wr_preserve_path, each.key)
   })
 }
 

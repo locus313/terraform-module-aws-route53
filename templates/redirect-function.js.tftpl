@@ -1,9 +1,20 @@
 function handler(event) {
+    var target = '${target_url}';
+%{ if preserve_path ~}
+    var request = event.request;
+    var qs = Object.keys(request.querystring || {}).map(function (k) {
+        var q = request.querystring[k];
+        var items = q.multiValue ? q.multiValue.map(function (m) { return m.value; }) : [q.value];
+        return items.map(function (v) { return v === '' ? k : k + '=' + v; }).join('&');
+    }).join('&');
+    var path = request.uri === '/' ? '' : request.uri;
+    target = target.replace(/\/+$/, '') + path + (qs ? '?' + qs : '');
+%{ endif ~}
     return {
         statusCode: 301,
         statusDescription: 'Moved Permanently',
         headers: {
-            'location': { value: '${target_url}' }
+            'location': { value: target }
         }
     };
 }

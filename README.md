@@ -294,6 +294,18 @@ module "complete_example" {
 }
 ```
 
+### Preserving the request path in redirects
+
+By default every request to a `records_wr` domain redirects to the exact destination URL. To append the visitor's path and query string instead, list the domain in `records_wr_preserve_path`:
+
+```hcl
+records_wr = {
+  "old.example.com" = "https://www.example.com/de/"
+}
+records_wr_preserve_path = ["old.example.com"]
+# old.example.com/ressource/x?a=1 -> https://www.example.com/de/ressource/x?a=1
+```
+
 ### Tagging
 
 Apply a common set of tags to every taggable resource the module creates (the hosted zone, and — when `records_wr` is set — the ACM certificate, CloudFront distribution, and S3 origin bucket):
