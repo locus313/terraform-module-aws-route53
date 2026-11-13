@@ -1,5 +1,5 @@
 ---
-applyTo: '**'
+applyTo: '**/*.go,.github/workflows/*.yml,.github/workflows/*.yaml'
 description: 'Comprehensive secure coding standards based on OWASP Top 10 2025, with 55+ anti-patterns, detection regex, framework-specific fixes for modern web and backend frameworks, and AI/LLM security guidance.'
 ---
 

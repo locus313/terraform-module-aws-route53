@@ -105,3 +105,5 @@ There is no committed `CHANGELOG.md` — the [release workflow](.github/workflow
 3. **Wrong zone reference** — use `aws_route53_zone.this[0]`, not `aws_route53_zone.this`.
 4. **CloudFront/S3 access errors** — the S3 bucket is private; only the matching CloudFront distribution can read it via OAC (`aws:SourceArn` condition in the bucket policy). Do not switch to S3 website hosting or public bucket policies.
 5. **Editing the generated API reference table in README.md** — it's overwritten by `terraform-docs` on the next PR; edit variable/output descriptions in `.tf` files instead.
+6. **Cross-variable references in `validation` blocks** — `versions.tf` allows Terraform 1.0 (CI validates with 1.0.0); a validation may only reference its own variable.
+7. **Real customer/domain names in examples** — use `example.com` subdomains in README, tests and `example/`. See [CODING_STANDARDS.md](CODING_STANDARDS.md).

@@ -1,5 +1,7 @@
 # Terraform AWS Route53 Module - AI Agent Instructions
 
+Commands, conventions, testing and pitfalls live in [AGENTS.md](../AGENTS.md) (single source of truth). This file holds only architecture rationale, security annotations and the maintenance matrix.
+
 ## Architecture Overview
 
 Reusable Terraform module for Route53 hosted zones and DNS records with an HTTPS web redirect feature (`records_wr`). Creates ONE hosted zone per invocation and manages multiple DNS records via `for_each` loops.
@@ -20,20 +22,7 @@ module "example" {
 }
 ```
 
-## Key Patterns & Gotchas
-
-### Zone Indexing Pattern
-All resources use `aws_route53_zone.this[0].zone_id` (note `[0]`) because zone uses `count = var.enabled ? 1 : 0`, not `for_each`.
-
-### DNS Record Variables
-- Standard records: `map(list(string))` - A, AAAA, CNAME, MX, TXT, NS, CAA
-- Web redirects: `map(string)` - single destination URL per domain (must start with `https://`, enforced by a `variables.tf` validation block)
-- TTL variables: `var.ttl` (3600), `var.ttl_acm` (60), `var.ttl_ns` (172800)
-
-### Enabled Gating
-`locals.tf` collapses every `var.records_*` map to `{}` when `var.enabled = false`, so all `for_each`-based resources naturally create zero instances instead of erroring on `aws_route53_zone.this[0]`. Resources reference `local.records_*`, not `var.records_*` directly.
-
-### Web Redirect Architecture (records_wr)
+## Web Redirect Architecture (records_wr)
 
 **Why the redirect happens in a CloudFront Function, not S3 website hosting**:
 - The S3 bucket (`s3.tf`) is a private placeholder origin — no objects are ever stored or served, and it has `block_public_acls`/`block_public_policy` fully enabled
@@ -47,39 +36,6 @@ for_each = { for dvo in flatten([
 ]) : dvo.domain_name => { ... } }
 ```
 Flattens all `domain_validation_options` from all ACM certs to create unique validation records.
-
-## Development Workflows
-
-**⚠️ CRITICAL**: Module root cannot be validated directly. Always work from `example/` directory:
-
-```bash
-# Format code (run from module root)
-terraform fmt -recursive
-
-# Validate/plan (MUST run from example/ directory)
-cd example && terraform init
-cd example && terraform validate
-cd example && terraform plan
-
-# Run Go tests (requires AWS credentials)
-cd test && go test -v -tags=integration -timeout 30m
-
-# Run fast Go unit tests (no AWS credentials needed, runs on every PR)
-cd test && go test -v ./...
-
-# Run compliance tests
-terraform-compliance -f compliance -p .
-```
-
-**Why example/ is required**: Module uses `configuration_aliases = [aws.acm]` which needs provider configuration only present in `example/provider.tf`.
-
-## Testing
-
-**Fast unit tests** (`test/cloudfront_function_test.go`): No AWS credentials needed, runs on every PR via `lint.yml`. Covers the `templates/redirect-function.js.tftpl` rendering logic — add cases here for any redirect-logic change.
-**Terratest** (`test/terraform_module_test.go`, build-tagged `integration`): Go integration tests using `example/` as fixture. Only runs nightly (`scheduled-test.yml`) since it applies real AWS resources; requires `-tags=integration`.
-**Compliance** (`compliance/features/example.feature`): Gherkin BDD for TTL policy checks
-
-When adding features: Update both test suites + `example/main.tf` demonstration.
 
 ## Security Annotations
 
@@ -108,12 +64,4 @@ What to update together when changing different parts of this module:
 | `outputs.tf` | `README.md` API reference is regenerated automatically by `documentation.yml` — no manual edit needed, but downstream consumers referencing output names should be considered |
 | `test/go.mod` Go or dependency versions | `.github/workflows/scheduled-test.yml` `setup-go` version, `test/go.sum` (via `go mod tidy`) |
 | Commit message conventions / release logic | `CONTRIBUTING.md` commit type table, `.github/workflows/release.yml` bump-detection regex |
-| Anything affecting AI agent guidance | `AGENTS.md` and this file — keep both in sync, they serve different tools but describe the same repo |
-
-## Common Errors
-
-1. **"Provider not configured"**: Missing `providers = { aws.acm = aws.acm }` or ACM provider not in us-east-1
-2. **Validation from module root fails**: Must run from `example/` directory (see Development Workflows)
-3. **Wrong zone reference**: Use `this[0]` not `this` for zone resource access
-4. **S3 access denied via CloudFront**: The bucket is private; access is only via OAC scoped to the distribution's `aws:SourceArn` — do not add `s3_origin_config`/website hosting or public bucket policies
-5. **`records_wr` validation error**: Values must be a full URL starting with `https://` (e.g. `https://example.com/path`), not a bare hostname — enforced by a `variables.tf` validation block
+| Anything affecting AI agent guidance | `AGENTS.md` for commands/conventions/pitfalls; this file for architecture rationale only. Do not duplicate content between them |
