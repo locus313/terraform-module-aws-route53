@@ -1,9 +1,10 @@
 package test
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
-	"regexp"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -11,27 +12,46 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// render emulates templatefile() for the redirect template: it substitutes
-// target_url and resolves the preserve_path %{ if } block.
+// requireTool skips locally when a tool is missing but fails in CI, so a broken
+// runner cannot silently disable these tests.
+func requireTool(t *testing.T, name string) {
+	if _, err := exec.LookPath(name); err != nil {
+		if os.Getenv("CI") != "" {
+			t.Fatalf("%s is required in CI", name)
+		}
+		t.Skipf("%s not available", name)
+	}
+}
+
+// render renders the redirect template through real Terraform templatefile().
 func render(t *testing.T, targetURL string, preservePath bool) string {
-	raw, err := os.ReadFile("../templates/redirect-function.js.tftpl")
+	requireTool(t, "terraform")
+	tpl, err := filepath.Abs("../templates/redirect-function.js.tftpl")
 	require.NoError(t, err)
 
-	block := regexp.MustCompile(`(?s)%\{ if preserve_path ~\}\n(.*?)%\{ endif ~\}\n`)
-	out := string(raw)
-	if preservePath {
-		out = block.ReplaceAllString(out, "$1")
-	} else {
-		out = block.ReplaceAllString(out, "")
+	dir := t.TempDir()
+	cfg := fmt.Sprintf(`output "code" {
+  value = templatefile(%q, { target_url = %q, preserve_path = %t })
+}
+`, tpl, targetURL, preservePath)
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "main.tf"), []byte(cfg), 0o600))
+
+	for _, args := range [][]string{{"init", "-input=false"}, {"apply", "-auto-approve", "-input=false"}} {
+		cmd := exec.Command("terraform", args...)
+		cmd.Dir = dir
+		out, err := cmd.CombinedOutput()
+		require.NoError(t, err, string(out))
 	}
-	return strings.ReplaceAll(out, "${target_url}", targetURL)
+	cmd := exec.Command("terraform", "output", "-raw", "code")
+	cmd.Dir = dir
+	out, err := cmd.Output()
+	require.NoError(t, err)
+	return string(out)
 }
 
 // location runs the rendered CloudFront Function in node and returns the Location header.
 func location(t *testing.T, code, event string) string {
-	if _, err := exec.LookPath("node"); err != nil {
-		t.Skip("node not available")
-	}
+	requireTool(t, "node")
 	script := code + "\nconsole.log(handler(" + event + ").headers.location.value)"
 	out, err := exec.Command("node", "-e", script).CombinedOutput()
 	require.NoError(t, err, string(out))
